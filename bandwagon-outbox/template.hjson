@@ -54,7 +54,7 @@
 		}
 
 		view: {do:"view-html", file:"outbox"}
-		collections: {do:"view-html"}
+		albums: {do:"view-html"}
 		events: {do:"view-html"}
 		news: {do:"view-html"}
 
