@@ -85,7 +85,7 @@
 							{{- end -}}
 						</div>
 					</div>
-		
+
 					<div class="margin-vertical">
 						{{- if not .IsMyself -}}
 							<button class="primary text-md" hx-get="/@{{.UserID}}/intent?intent=follow&object={{.Permalink}}">Follow for Updates</button>
@@ -111,7 +111,7 @@
 					{{- range $featured -}}
 						{{- if or .IsPublished $isMyself -}}
 							<div class="rounded card flex-column hover-trigger hover-swell" script="install blockselect()">
-								{{- if eq "bandwagon-album" .TemplateID -}}
+								{{- if eq "blank-album" .TemplateID -}}
 									<img src="{{.IconURL}}" class="square width-100% block" style="object-fit:cover; border-top-left-radius: var(--rhythm); border-top-right-radius: var(--rhythm);" aria-hidden="true">
 									<div class="padding text-plain">
 										<a hx-get="/{{.StreamID}}" href="/{{.StreamID}}" class="turboclick">{{.Label}}</a>
@@ -147,7 +147,7 @@
 							</div>
 						{{- end -}}
 					{{- end -}}
-	
+
 					{{- if $isMyself -}}
 
 						<div class="rounded card padding flex-column">
@@ -167,7 +167,7 @@
 								{{icon "newspaper"}} Add a Post
 							</div>
 						</div>
-	
+
 						{{- if $featured.IsEmpty -}}
 							<div class="padding text-light-gray align-center" role="none" aria-hidden="true">
 								<div class="text-xl margin-sm">&larr; Start Here</div>

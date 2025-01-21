@@ -1,4 +1,4 @@
-{{- $albums := (.Outbox.Where "templateId" "bandwagon-album").ByRankAlt.Slice -}}
+{{- $albums := (.Outbox.Where "templateId" "blank-album").ByRankAlt.Slice -}}
 {{- $isMyself := .IsMyself -}}
 {{- $description := .Data "description-albums" -}}
 
@@ -35,7 +35,6 @@
 								<a hx-get="/{{.StreamID}}" href="/{{.StreamID}}" class="block turboclick">
 									<div class="block padding">
 										<div class="bold">{{.Label}}</div>
-										<div>{{.Data.year}}</div>
 									</div>
 								</a>
 

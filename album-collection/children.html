@@ -1,0 +1,37 @@
+{{- $results := .Children.Top6.Slice -}}
+{{- $canEdit := .UserCan "edit" -}}
+{{- $isowner := .IsOwner -}}
+
+{{- if not $results.IsEmpty -}}
+
+    {{- range $index, $creation := $results -}}
+
+		<div streamId="{{.StreamID}}" class="item">
+			<div
+				hx-get="/{{.Token}}"
+				hx-push-url="true"
+				class="clickable card"
+				style="overflow:hidden; aspect-ratio:1;">
+				<img src="{{$creation.Data.imageURL}}&amp;width=150" class="width-100%">
+
+				<button hx-get="/{{$creation.StreamID}}" class="margin-right-none margin-left-sm" aria-label="Creation Details">{{icon "more-horizontal"}}</button>
+				{{- if $canEdit -}}
+					<button hx-get="/{{$creation.StreamID}}/edit" class="margin-right-none margin-left-sm">Edit</button>
+				{{- end -}}
+			</div>
+		</div>
+
+	{{- end -}}
+
+	{{- if $results.IsLength 6 -}}
+
+		<div
+			hx-get="/{{.Token}}/children?publishDate=lt:{{$results.Last.PublishDate}}"
+			hx-push-url="false"
+			hx-trigger="revealed"
+			hx-target="#children"
+			hx-swap="beforeend"></div>
+
+	{{- end -}}
+
+{{- end -}}

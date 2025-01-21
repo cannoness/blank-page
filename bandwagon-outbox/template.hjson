@@ -28,7 +28,7 @@
 					background-body: {type:"string", format:"uri"}
 					color-body: {type:"string", format:"color"},
 					color-menu: {type:"string", format:"color"},
-					color-page: {type:"string", format:"color"}, 
+					color-page: {type:"string", format:"color"},
 					color-button: {type:"string", format:"color"}
 				}
 			}
@@ -42,7 +42,7 @@
 		create: {
 			steps:[
 				{
-					do:"set-data", 
+					do:"set-data",
 					values:{
 						"data.label-albums":"Albums",
 						"data.label-events":"Events",
@@ -54,7 +54,7 @@
 		}
 
 		view: {do:"view-html", file:"outbox"}
-		albums: {do:"view-html"}
+		collections: {do:"view-html"}
 		events: {do:"view-html"}
 		news: {do:"view-html"}
 
@@ -65,8 +65,8 @@
 					do: add-stream
 					style: inline
 					location: outbox
-					template: bandwagon-album
-					label: + Add Album
+					template: blank-album
+					label: + Create Album
 					set-permissions: {copy:true, editor:["self"]}
 				}
 				{do:"set-data", values:{"data.show-albums":"true"}}
@@ -152,7 +152,7 @@
 										{type:"toggle", path:"isIndexable", options:{text:"Indexable (request inclusion in search engines)"}}
 									]
 								}
-								
+
 							]
 						}
 					}
@@ -164,7 +164,7 @@
 					{do:"search-index", if:"{{.IsIndexable}}"}
 					{do:"refresh-page"}
 				]}
-			] 
+			]
 		}
 
 		edit-banner: {
@@ -188,7 +188,7 @@
 					{do:"search-index", if:"{{.IsIndexable}}"}
 					{do:"refresh-page"}
 				]}
-			] 
+			]
 		}
 
 		edit-colors: {
@@ -217,7 +217,7 @@
 					{do:"search-index", if:"{{.IsIndexable}}"}
 					{do:"refresh-page"}
 				]}
-			] 
+			]
 		}
 
 		edit-menu: {

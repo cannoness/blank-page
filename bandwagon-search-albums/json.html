@@ -4,7 +4,7 @@
 {{- $syndicationSlice := array $syndication "ALL-PARTNERS" -}}
 
 {{- $streams := .Streams.Top600.ByPublishDate.Reverse -}}
-{{- $streams := $streams.Where "templateId" "bandwagon-album" -}}
+{{- $streams := $streams.Where "templateId" "blank-album" -}}
 {{- $streams := $streams.WhereIN "syndication.values" $syndicationSlice -}}
 {{- $streams := $streams.Slice -}}
 

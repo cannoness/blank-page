@@ -1,0 +1,94 @@
+{
+	templateId: blank-nav-link
+	templateRole:search
+	model:stream
+	containedBy: ["top", "home", "folder"]
+	label: "Redirect"
+	description: "Back to blank"
+	icon: "forward"
+	schema: {
+		type: "object"
+		properties: {
+			label: {type:"string"}
+			summary: {type:"string"}
+			data: {type: "object", properties: {
+				url: {type: "string", format:"url"}
+				pageTitle: {type: "string"}
+			}}
+		}
+	}
+	states: {}
+	roles: {}
+	actions: {
+
+		sidebar: {do:"view-html"}
+		heading: {
+			roles: ["viewer", "editor", "owner"]
+			do: "view-html"
+		}
+		create: {
+			roles:["owner"]
+			steps:[
+				{do: "save-and-publish"}
+				{do:"save", message:"Created by {{.Author.DisplayName}}"}
+				{do:"forward-to", url:"/{{.StreamID}}/edit"}
+			]
+		}
+		view: {
+			stateRoles: {
+				published: ["anonymous"]
+			}
+			do: "view-html"
+		}
+		edit: {
+			roles: ["owner"]
+			steps:[{
+				do: "as-modal"
+				background:"view"
+				steps: [
+					{
+						do: "edit"
+						label: "Edit Redirect"
+						form: {
+							type: "layout-vertical"
+							children: [
+								{type: "text", label: "Label", path: "label"}
+								{type: "text", label: "Page name of redirect", path: "data.pageTitle"}
+								{type: "text", label: "URL", path: "data.url"}
+							]
+						}
+					},
+					{do: "save", comment: "Updated Redirect"}
+                    {do: "if", condition: "{{.IsPublished}}",
+                        then: [
+                            {do:"search-index", text:"{{.Label}} {{.Summary}}"}
+                            {do:"save-and-publish"}
+                        ],
+                        else: [
+                            {do:"search-index", action:"delete"}
+                            {do:"save"}
+                        ]
+                    }
+                    {do: "refresh-page"}
+                ]
+			}]
+		}
+		delete: {
+			roles: ["owner"]
+			steps: [
+				{do:"delete", title:"Delete this Item?", message:"This will permanently delete this item from your website."}
+				{do:"forward-to", url:"{{.ParentID}}/"}
+			]
+		}
+
+		sharing: {
+			roles: ["owner"]
+			steps: [
+				{do:"as-modal", steps: [
+					{do: "set-simple-sharing", roles: ["viewer"], title:"Who Can See This Folder?", message: "Select who can view this folder."}
+					{do:"save", message: "Sharing updated by {{.Author}}"}
+				]}
+			]
+		}
+	}
+}

@@ -51,7 +51,7 @@ white-space:nowrap;
 background-color: {{$buttonColor}};
 color: {{$buttonColor.Text}};">&#9658; Play on Bandwagon</a>
                     </div>
-                    
+
                     {{- if ne "" .Summary -}}
                         <div style="margin-top:16px; margin-bottom:8px; line-height:120%; max-height:3.6em; overflow:hidden; text-overflow:ellipsis;">
                             {{.Summary}}
@@ -64,7 +64,7 @@ color: {{$buttonColor.Text}};">&#9658; Play on Bandwagon</a>
                             &copy;
                             Copyright.  All Rights Reserved.
                         {{- else if ne "" $license -}}
-                            {{- $licenses := .Dataset "bandwagon-album.licenses" -}}
+                            {{- $licenses := .Dataset "blank-album.licenses" -}}
                             {{- $licenseInfo := $licenses.Value $license -}}
                                 {{icon $licenseInfo.Icon}} 
                                 {{$licenseInfo.Label}}

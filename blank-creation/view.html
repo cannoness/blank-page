@@ -1,37 +1,26 @@
 {{- $album := .Parent "view" -}}
 {{- $links := .Data "links" -}}
 {{- $streamURL := .Data "streamURL" -}}
-{{- $lyrics := .Data "lyrics" -}}
-{{- $attachmentID := .Data "attachmentId" -}}
-{{- $duration := .Data "length"}}
+{{- $description := .Data "description" -}}
+{{- $imageURL := .Data "imageURL" -}}
 
 <div class="page">
 
 	<link rel="stylesheet" href="/{{.ParentID}}/stylesheet">
 	
-	<!-- oEmbed: https://oembed.com -->
-	<link rel="alternate" type="application/json+oembed" href="{{.OEmbedJSON}}">
-	<link rel="alternate" type="text/xml+oembed" href="{{.OEmbedXML}}">
-
-	<!-- Open Graph: https://ogp.me/ -->
-	<!-- https://developers.facebook.com/docs/opengraph/music/ -->
-	<meta property="og.type" content="music.song">
-	<meta property="og:title" content="{{.Label}}">
-	<meta property="og:url" content="{{.Permalink}}">
-	<meta property="og:image" content="{{$album.IconURL}}">
+	<meta property="og:image" content="{{.AttributedTo.IconURL}}">
 	<meta property="og:site_name" content="{{.DomainLabel}}">
 	<meta property="og:description" content="{{.Summary}}">
-	<meta property="og:audio" content="{{.Host}}/{{.StreamID}}/attachments/{{$attachmentID}}">
-	<meta property="og:music:duration" content="{{$duration}}">
-	<meta property="og:music:album" content="{{$album.URL}}">
-	<meta property="og:music:album:track" content="{{.Rank}}">
 	<meta property="og:music:musician" content="{{.AttributedTo.ProfileURL}}">
 
-	<div class="md:flex-row margin-bottom">
-		<div class="md:width-256 flex-shrink-0">
-			<img src="{{$album.IconURL}}" class="width-100% aspect-square" aria-hidden="true" style="object-fit:cover;">
-		</div>
-
+	<div class="md:flex-row margin-bottom" >
+		<div style="width:24px;">
+					{{- if eq .AttributedTo.IconURL "" -}}
+							<div class="circle-64"></div>
+						{{- else -}}
+							<img src="{{.AttributedTo.IconURL}}" class="circle-64">
+					{{- end -}}
+				</div>
 		<div class="md:width-32"></div>
 		<div class="flex-grow-1">
 			<div class="text-lg margin-top-none">
@@ -42,46 +31,23 @@
 				<a href="/{{$album.StreamID}}" class="turboclick" aria-label="Album: $album.Label">{{ $album.Label }}</a>
 			</div>
 			<h1 class="margin-vertical-none">
-				<span aria-label="Track: {{.Label}}">{{.Label}}</span>
+				<span aria-label="Title: {{.Label}}">{{.Label}}</span>
 				{{- if eq true (.Data "explicit") -}}
-					<span class="text-light-gray text-xl margin-left" title="Explicit Lyrics" aria-label="Explicit Lyrics">{{icon "explicit-fill"}}</span>
+					<span class="text-light-gray text-xl margin-left" title="Explicit" aria-label="Explicit">{{icon "explicit-fill"}}</span>
 				{{- end -}}
 			</h1>
 
-			<div class="margin-bottom text-gray">
-				{{ if ne nil ($album.Data "year") -}}
-					{{$album.Data "year"}}
-					{{ if ne nil (.Data "length") -}}
-						<span aria-hidden="true">&middot;</span>
-					{{ end }} 
-				{{- end -}}
-				{{.Data "length"}}
-			</div>
-
-			<div class="margin-vertical"></div>
+			<div class="margin-vertical">
+					<img src="{{$imageURL}}" alt=""></div>
 			<div class="margin-vertical-lg">
 
 				<div id="media-controls" class="margin-vertical-lg">
-					<button hx-get="/{{.StreamID}}/prev" role="link" aria-label="Previous Track">{{icon "skip-backward-fill"}} Prev</button>
-					{{ if ne nil $attachmentID }}
-						<button hx-on:click="PlayFirst()" class="primary playing-hide" aria-label="Play Track">{{icon "play-fill"}} Play</button>
-						<button hx-on:click="Pause()" class="primary playing-show" aria-label="Pause Track">{{icon "pause-fill"}} Pause</button>
-						<script src="/.templates/album-collection/javascript" preload></script>
-						<script type="application/javascript">
-							var playlist = [
-								{"url":"/{{$.StreamID}}/attachments/{{$attachmentID}}", "title":"{{.Label}}"}
-							]
-						</script>
-						<audio>
-							<source id="source-mp3" type="audio/mp3">
-							<source id="source-ogg" type="audio/ogg">
-						</audio>
-					{{ else }}
-						<button disabled aria-label="Play Track">{{icon "play-fill"}} Play</button>
-					{{ end }}
-					<button hx-get="/{{.StreamID}}/next" role="link" aria-label="Next Track">Next {{icon "skip-forward-fill"}}</button>
+					<button hx-get="/{{.StreamID}}/prev" role="link" aria-label="Previous">{{icon "caret-left-fill"}} Prev</button>
+					<button hx-get="/{{.StreamID}}/next" role="link" aria-label="Next">Next {{icon "caret-right-fill"}}</button>
 				</div>
-
+					<a href="{{$links}}" target="_blank" class="block ellipsis">
+						<i class="bi bi-link-45deg"></i> Source
+					</a><br>
 				<div class="text-sm">
 					<button hx-get="/{{.StreamID}}/intent?intent=create&content={{.Label}} {{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "share"}}</span> Share</button>
 					<button hx-get="/{{.StreamID}}/intent?intent=like&object={{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "thumbs-up"}}</span> Like</button>
@@ -96,8 +62,8 @@
 
 		<div class="flex-grow-1">
 
-			{{- if ne nil $lyrics -}}
-				<div class="margin-bottom-xl padding-right-xl">{{$lyrics | text}}</div>
+			{{- if ne nil $description -}}
+				<div class="margin-bottom-xl padding-right-xl">{{$description | text}}</div>
 			{{- end -}}
 	
 		</div>
@@ -164,6 +130,7 @@
 				<br>
 			{{- end -}}
 
+
 			{{- if ne nil $streamURL -}}
 				<a href="{{$streamURL}}" target="_blank" class="block ellipsis">
 					<i class="bi bi-camera-video-fill"></i> Music Video
@@ -171,22 +138,6 @@
 			{{- end -}}
 
 			<br>
-			{{- if ne nil (.Data "artist") -}}
-				Artist: {{.Data "artist"}}<br>
-			{{- end -}}
-
-			{{- if ne nil (.Data "composer") -}}
-				Composer: {{.Data "composer"}}<br>
-			{{- end -}}
-
-			{{- if ne nil (.Data "producer") -}}
-				Producer: {{.Data "producer"}}<br>
-			{{- end -}}
-
-			<br>
-			{{- if ne nil (.Data "isrc") -}}
-				ISRC: {{.Data "isrc"}}<br>
-			{{- end -}}
 		
 		</div>
 
@@ -197,9 +148,9 @@
 			<div class="button-group">
 				<button hx-get="/@{{.AttributedTo.UserID.Hex}}/edit">Edit Profile</button>
 				<button hx-get="/{{.ParentID}}/edit">Edit Album</button>
-				<button hx-get="/{{.StreamID}}/edit">Edit Song</button>
+				<button hx-get="/{{.StreamID}}/edit">Edit Creation</button>
 			</div>
-			<button hx-get="/{{.ParentID}}/add-song" class="primary"><span aria-label="Add">{{icon "add"}}</span> Another Song</button>
+			<button hx-get="/{{.ParentID}}/add-creation" class="primary"><span aria-label="Add">{{icon "add"}}</span> Another Image Link</button>
 		</div>
 	{{- end -}}
 	

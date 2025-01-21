@@ -1,0 +1,207 @@
+{
+	templateId: blank-creation
+	templateRole: song
+	label: Creation
+	extends: ["base-intent"]
+	containedBy: ["album"]
+	schema: {
+		type: object
+		properties: {
+			label: {type: "string", required: true}
+			data: {
+				type: object 
+				properties: {
+					category: {type: "string"}
+					tags: {type: "string"}
+					description: {type: "string"}
+					streamURL: {type: "string", format:"url"}
+					featured: {type: "boolean"}
+					explicit: {type: "boolean"}
+					imageURL: {type: "string", format: "url"}
+					filename: {type: "string"}
+					links: {type:"object", wildcard: {type:"string", format:"uri"}}
+				}
+			}
+		}
+	}
+
+	socialRole: Creation
+	searchText: "{{.Label}} {{index .Data `description`}}"
+	socialRules: [
+		{target:"attributedTo.id", path:"attributedTo.profileUrl"},
+		{target:"attributedTo.name", path:"attributedTo.name"},
+		{target:"links", forEach:"data.links", rules:[
+			{target:"label", path:"key"}
+			{target:"rel", value:"alternate"}
+			{target:"href", path:"value"}
+		]}
+		{target:"track.type", value:"Track"}
+		{target:"track.id", path:"url"}
+		{target:"track.name", path:"label"}
+		{target:"track.album", expression:"{{.ParentURL}}"}
+		{target:"content", path:"data.description"}
+		{target:"track.position", path:"rank"}
+		{target:"album", expression:"{{.ParentURL}}"}
+		{target:"artist", expression:"{{.ParentURL .ParentURL}}"}
+		{target:"library", expression:"{{.ParentURL}}/pub/children"}
+	]
+
+	searchRules: [
+		{target:"fullText", expression:"{{.Label}} {{index .Data `description`}}"}
+		{target:"icon", expression:""}
+	]
+
+	actions: {
+		create: {
+			roles: ["admin", "author"]
+			steps: [
+				{do:"as-modal", steps:[
+					{
+						do:"edit", 
+						form:{
+							type: layout-tabs
+							label: + Add a Creation
+							children: [
+								{
+									type: layout-vertical
+									label: General
+									children: [
+											{type: "text",   path: "label", label: "Creation Title"},
+                                            {type: "text",   path: "data.imageURL", label: "File Link"},
+                                            {type: "toggle", path: "isFeatured", options:{true-text:"Featured", false-text:"Featured"}}
+											{type: "toggle", path: "data.explicit", options:{true-text:"Explicit", false-text:"Explicit"}}
+									]
+								}
+								{
+									type: layout-vertical
+									label: Metadata
+									children: [
+										{type: "text", path: "data.category", label: "Category"},
+										{type: "text", path: "data.tags", label: "Tags"},
+									]
+								}
+								{
+									type: layout-vertical
+									label: Links
+									children: [
+                                        {type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
+										{type:"text", path:"data.links.BANDCAMP", options:{placeholder:"Bandcamp"}}
+										{type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
+										{type:"text", path:"data.links.SOUNDCLOUD", options:{placeholder:"Soundcloud"}}
+										{type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
+										{type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
+										{type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
+										{type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
+										{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
+									]
+								}
+								{
+									type: layout-vertical
+									label: Description
+									children: [
+										{type: "textarea", path: "data.description", description:"Enter description to display on a creation's detail page", options:{rows: 16}}
+									]
+								}
+							]
+						}
+					}
+				]}
+				{do:"save-and-publish"}
+				{do:"search-index"}
+				{do:"forward-to", url:"/{{.StreamID}}"}
+			]
+		}
+		view: {
+			steps: [
+				{do:"view-html"}
+			]
+		}
+		edit: {
+			roles: ["admin", "author"]
+			steps: [
+				{
+					do:"as-modal",
+					steps:[
+						{
+							do:"edit", 
+							options: ["delete:/{{.StreamID}}/delete"]
+							form:{
+								type: layout-tabs
+								label: Edit Creation
+								children: [
+									{
+										type: layout-vertical
+										label: General
+										children: [
+											{type: "text",   path: "label", label: "Creation Title"},
+                                            {type: "text",   path: "data.imageURL", label: "File Link"},
+                                            {type: "toggle", path: "isFeatured", options:{true-text:"Featured", false-text:"Featured"}}
+											{type: "toggle", path: "data.explicit", options:{true-text:"Explicit", false-text:"Explicit"}}
+										]
+									}
+									{
+										type: layout-vertical
+										label: Metadata
+										children: [
+                                            {type: "text", path: "data.category", label: "Category"},
+                                            {type: "text", path: "data.tags", label: "Tags"},
+										]
+									}
+									{
+										type: layout-vertical
+										label: Links
+										children: [
+                                            {type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
+                                            {type:"text", path:"data.links.BANDCAMP", options:{placeholder:"Bandcamp"}}
+                                            {type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
+                                            {type:"text", path:"data.links.SOUNDCLOUD", options:{placeholder:"Soundcloud"}}
+                                            {type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
+                                            {type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
+                                            {type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
+                                            {type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
+                                            {type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
+										]
+									}
+									{
+									type: layout-vertical
+									label: Description
+									children: [
+										{type: "textarea", path: "data.description", description:"Enter description to display on a creation's detail page", options:{rows: 16}}
+									]
+								    }
+								]
+							}
+						}
+					]
+				}
+				{do:"save-and-publish"}
+				{do:"search-index"}
+				{do:"refresh-page"}
+			]
+		}
+
+		delete: {
+			roles: ["admin", "author"]
+			steps: [
+				{do:"delete", title:"Delete this Creation?"}
+				{do:"refresh-page"}
+			]
+		}
+
+		prev: {
+			steps:[
+				{do:"with-prev-sibling", steps:[
+					{do:"redirect-to", url:"/{{.StreamID}}"}
+				]}
+			]
+		}
+
+		next: {
+			steps:[
+				{do:"with-next-sibling", steps:[
+					{do:"redirect-to", url:"/{{.StreamID}}"}
+				]}
+			]
+		}
+	}
+}
