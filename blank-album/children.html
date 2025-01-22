@@ -2,36 +2,23 @@
 {{- $canEdit := .UserCan "edit" -}}
 {{- $isowner := .IsOwner -}}
 
-{{- if not $results.IsEmpty -}}
+    <div class="container-all" >
 
-    {{- range $index, $creation := $results -}}
+        <script src="/.templates/blank-album/javascript"  type="text/javascript" ></script>
+        <span id="content"> No creations found. <br/>
+            <button onclick="linkDiscord()" hx-target="body" hx-swap="outerHTML">Link Discord ID</button>
 
-		<div streamId="{{.StreamID}}" class="item">
-			<div
-				hx-get="/{{.Token}}"
-				hx-push-url="true"
-				class="clickable card"
-				style="overflow:hidden; aspect-ratio:1;">
-				<img src="{{$creation.Data.imageURL}}&amp;width=150" class="width-100%">
+        <script id="gallery">renderExhibit();</script>
+        </span>
+      <output id="output">
+          <p class=".text-info"> -- </p>
+      </output>
+    </div>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-bottom">
+        <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
+            <ul class="pagination pagination-sm mb-0" id="pagination">
 
-				<button hx-get="/{{$creation.StreamID}}" class="margin-right-none margin-left-sm" aria-label="Creation Details">{{icon "more-horizontal"}}</button>
-				{{- if $canEdit -}}
-					<button hx-get="/{{$creation.StreamID}}/edit" class="margin-right-none margin-left-sm">Edit</button>
-				{{- end -}}
-			</div>
-		</div>
-
-	{{- end -}}
-
-	{{- if $results.IsLength 6 -}}
-
-		<div
-			hx-get="/{{.Token}}/children?publishDate=lt:{{$results.Last.PublishDate}}"
-			hx-push-url="false"
-			hx-trigger="revealed"
-			hx-target="#children"
-			hx-swap="beforeend"></div>
-
-	{{- end -}}
-
-{{- end -}}
+            </ul>
+            </div>
+        </div>
+    </nav>
