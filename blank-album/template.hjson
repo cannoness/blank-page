@@ -71,6 +71,10 @@
 	}
 	bundles: {
 		javascript: {contentType: "text/javascript"}
+
+		stylesheet: {
+			content-type:text/css"
+		}
 	}
 
 	actions: {

@@ -1,30 +1,11 @@
 function apiURL() {
-    return "http://localhost:9000/"
+    return "http://localhost:9091/"
 }
 
 
 function renderResults(data, limit, skip) {
-    fetch(`${apiURL()}creative/get_cache_last_update`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-          Authorization: getAuthToken()
-        }
-      })
-      .then((response) => {
-      if (!response.ok)
-          throw new Error(response.statusText);
-      return response.json();
-      })
-      .then((cache) => {
-        data.data.forEach((entry) => {
-            entry.renderedCategory = renderCategory(entry.category);
-            return entry;
-        });
-        var th_gallery = {"data": data.data, cache_last_update: cache.last_updated}
-        var output = Mustache.render(template, th_gallery);
-        htmx.find("#content").innerHTML = output;
+
+        htmx.find("#content").innerHTML = data;
         htmx.process(htmx.find("#content"));
 
         let isLast = Math.floor(data.total/limit) > Math.ceil(skip/limit) ? false : true;
@@ -33,8 +14,6 @@ function renderResults(data, limit, skip) {
         var output = Mustache.render(paginationTemplate, pagination_data);
         htmx.find("#pagination").innerHTML = output;
         htmx.process(htmx.find("#pagination"))
-    })
-    .catch (error => htmx.find('#output').innerHTML = error )
 }
 
 function renderExhibit(limit=65, skip=0) {
@@ -42,9 +21,9 @@ function renderExhibit(limit=65, skip=0) {
     fetch(`${apiURL()}creative/exhibit/${limit}/${skip}`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        accept: "application/json",
-        Authorization: getAuthToken()
+         accept: "application/json",
+         mode: "no-cors",
+         Authorization: `Bearer ${document.cookie.split("=")[1]}`
       }
     })
     .then((response) => {
@@ -53,7 +32,7 @@ function renderExhibit(limit=65, skip=0) {
         return response.json();
      })
     .then((data) => {
-        if (data.data && data.data.length >= 1) {
+        if (data) {
             renderResults(data, limit, skip);
         }
         else {

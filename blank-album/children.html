@@ -5,11 +5,14 @@
     <div class="container-all" >
 
         <script src="/.templates/blank-album/javascript"  type="text/javascript" ></script>
+        <div class="container">
         <span id="content"> No creations found. <br/>
-            <button onclick="linkDiscord()" hx-target="body" hx-swap="outerHTML">Link Discord ID</button>
+            <button onclick="renderExhibit()" hx-target="body" hx-swap="outerHTML">Link Discord ID</button>
 
-        <script id="gallery">renderExhibit();</script>
+        <script  src="/.templates/blank-album/javascript"   id="gallery">renderExhibit();</script>
         </span>
+
+            </div>
       <output id="output">
           <p class=".text-info"> -- </p>
       </output>

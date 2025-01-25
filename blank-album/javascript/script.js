@@ -99,6 +99,7 @@ function register() {
 
 function profile() {
     const token = sessionStorage["authToken"].slice(7,);
+    document.cookie += `; token`
     window.location.href=`http://localhost:8080/.sso?token=${token}`
 }
 
