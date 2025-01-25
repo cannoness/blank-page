@@ -2,26 +2,11 @@
 {{- $canEdit := .UserCan "edit" -}}
 {{- $isowner := .IsOwner -}}
 
-    <div class="container-all" >
-
-        <script src="/.templates/blank-album/javascript"  type="text/javascript" ></script>
-        <div class="container">
-        <span id="content"> No creations found. <br/>
-            <button onclick="renderExhibit()" hx-target="body" hx-swap="outerHTML">Link Discord ID</button>
-
-        <script  src="/.templates/blank-album/javascript"   id="gallery">renderExhibit();</script>
-        </span>
-
-            </div>
       <output id="output">
           <p class=".text-info"> -- </p>
       </output>
-    </div>
-    <nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-bottom">
-        <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
-            <ul class="pagination pagination-sm mb-0" id="pagination">
 
-            </ul>
-            </div>
-        </div>
-    </nav>
+        <script src="/.templates/blank-album/javascript"  type="text/javascript" ></script>
+            <span id="content">No creations found. <br/>
+                <button onclick="renderExhibit()" hx-target="body" hx-swap="outerHTML">Link Discord ID</button>
+            </span>

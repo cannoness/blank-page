@@ -11,9 +11,9 @@ function renderResults(data, limit, skip) {
         let isLast = Math.floor(data.total/limit) > Math.ceil(skip/limit) ? false : true;
         let trueIndex = Math.floor(skip/limit);
         var pagination_data = {lastPage: isLast, first: trueIndex, next: skip+limit, last: data.total-limit, previous: skip-limit, page: Math.floor(skip/limit) + 1, limit: limit, total_pages: Math.floor(data.total/limit)}
-        var output = Mustache.render(paginationTemplate, pagination_data);
-        htmx.find("#pagination").innerHTML = output;
-        htmx.process(htmx.find("#pagination"))
+//        var output = Mustache.render(paginationTemplate, pagination_data);
+//        htmx.find("#pagination").innerHTML = output;
+//        htmx.process(htmx.find("#pagination"))
 }
 
 function renderExhibit(limit=65, skip=0) {
