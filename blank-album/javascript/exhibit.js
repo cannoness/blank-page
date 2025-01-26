@@ -147,3 +147,5 @@ function keywordSearch(skip=0, limit=66) {
    })
    .catch (error => htmx.find('#output').innerHTML = error )
 }
+
+renderExhibit();

@@ -104,22 +104,23 @@ h1{
   color:white;
 }
 .container-all{
+  max-width: 911px;
   width: fit-content;
   margin: 20px auto;
   height: auto;
 }
 .container{
   width: calc(20% - 2px);
-  min-width: 250px;
+  min-width: 225px;
   overflow:hidden;
-  height: 250px;
+  height: 225px;
   margin:1px;
   padding: 0;
   display:block;
   position:relative;
-  float:left;
+  float:right;
 }
-#content > div > img{
+.container img {
   object-fit: cover;
   transition-duration: .3s;
   min-width: 100%;
@@ -214,17 +215,17 @@ h1{
 }
 @media only screen and (max-width: 300px) {
     .container {
-      width: 250px;
+      width: 225px;
     }
 }
 @media only screen and (max-width: 360px) {
     .container {
-        width: 350px;
+        width: 325px;
     }
 }
 @media only screen and (max-width: 450px) {
   .container {
-      width: 375px;
+      width: 350px;
   }
 }
 
