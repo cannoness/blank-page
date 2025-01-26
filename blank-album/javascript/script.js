@@ -215,7 +215,14 @@ function confirmLogout() {
   }
 
 function linkDiscord() {
-    htmx.ajax( "GET", `${apiURL()}auth/authorize_discord`)
+   fetch(`${apiURL()}auth/authorize_discord`, {
+      method: "GET",
+      headers: {
+         accept: "application/json",
+         mode: "no-cors",
+         Authorization: `Bearer ${document.cookie.split("=")[1]}`
+      }
+    })
     .then((response) =>  {
          if (!response.ok)
             throw new Error(response.statusText);
