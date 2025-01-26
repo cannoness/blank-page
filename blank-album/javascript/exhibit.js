@@ -2,18 +2,14 @@ function apiURL() {
     return "http://localhost:9091/"
 }
 
-
 function renderResults(data, limit, skip) {
 
-        htmx.find("#content").innerHTML = data;
+        htmx.find("#content").innerHTML = data.exhibit;
         htmx.process(htmx.find("#content"));
 
-        let isLast = Math.floor(data.total/limit) > Math.ceil(skip/limit) ? false : true;
-        let trueIndex = Math.floor(skip/limit);
-        var pagination_data = {lastPage: isLast, first: trueIndex, next: skip+limit, last: data.total-limit, previous: skip-limit, page: Math.floor(skip/limit) + 1, limit: limit, total_pages: Math.floor(data.total/limit)}
-//        var output = Mustache.render(paginationTemplate, pagination_data);
-//        htmx.find("#pagination").innerHTML = output;
-//        htmx.process(htmx.find("#pagination"))
+
+        htmx.find("#pagination").innerHTML = data.pagination;
+        htmx.process(htmx.find("#pagination"));
 }
 
 function renderExhibit(limit=65, skip=0) {
@@ -37,11 +33,11 @@ function renderExhibit(limit=65, skip=0) {
         }
         else {
             let message = "No images linked to your discord id were found in ThumbHubBot's database. Have you linked to discord?"
-            htmx.find("#output").innerHTML = message
+            htmx.find("#output").innerHTML = message;
         }
     })
     .catch (error => {
-        htmx.find("#output").innerHTML = error
+        htmx.find("#output").innerHTML = error;
     })
 }
 
@@ -75,7 +71,9 @@ function confirmRemoval(link_id) {
               headers: {
                 "Content-Type": "application/json",
                 accept: "application/json",
-                Authorization: getAuthToken()
+
+                 mode: "no-cors",
+                 Authorization: `Bearer ${document.cookie.split("=")[1]}`
               }
             })
             .then((response) => {
@@ -98,7 +96,9 @@ function clearCache() {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           accept: "application/json",
-          Authorization: getAuthToken()
+
+         mode: "no-cors",
+         Authorization: `Bearer ${document.cookie.split("=")[1]}`
         }
       })
       .then((response) => {
@@ -127,7 +127,9 @@ function keywordSearch(skip=0, limit=66) {
       headers: {
         "Content-Type": "application/json",
         accept: "application/json",
-        Authorization: getAuthToken()
+
+         mode: "no-cors",
+         Authorization: `Bearer ${document.cookie.split("=")[1]}`
       }
     })
   .then((response) => {

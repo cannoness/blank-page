@@ -1,7 +1,6 @@
 var navTemplate;
 var tabTemplate;
 
-
 function register() {
     Swal.fire({
         title: 'Registration',
@@ -218,9 +217,7 @@ function linkDiscord() {
    fetch(`${apiURL()}auth/authorize_discord`, {
       method: "GET",
       headers: {
-         accept: "application/json",
-         mode: "no-cors",
-         Authorization: `Bearer ${document.cookie.split("=")[1]}`
+         accept: "application/json"
       }
     })
     .then((response) =>  {
@@ -241,18 +238,4 @@ function linkTumblr() {
   .catch (error =>
       htmx.find('#output').innerHTML = JSON.stringify(error)
   );
-}
-
-function getAuthToken() {
-    return sessionStorage['authToken']
-}
-
-function renderNavLinks() {
-  var authenticationStatus = {"isAuthenticated": !!getAuthToken()}
-  var output = Mustache.render(navTemplate, authenticationStatus);
-  htmx.find("#navbar").innerHTML = output;
-  htmx.process(htmx.find("#navbar"));
-  output = Mustache.render(tabTemplate, authenticationStatus);
-  htmx.find("#navbar-authenticated").innerHTML = output;
-  htmx.process(htmx.find("#navbar-authenticated"));
 }

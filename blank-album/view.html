@@ -21,7 +21,6 @@
 <div class="page padding-none">
 
 	<link rel="stylesheet" type="text/css" href="/{{.StreamID}}/stylesheet?v={{.ETag}}"/>
-
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta property="og:title" content="{{.Label}}">
 	<meta property="og:url" content="{{.Permalink}}">
@@ -205,11 +204,20 @@
 
 	<div hx-get="/{{.StreamID}}" hx-trigger="refreshPage from:window" hx-push-url="false"></div>
 
+	<nav class="pos-absolute-bottom navbar navbar-expand-sm fixed-bottom">
+		<div class="pos-absolute-bottom-left text-sm">
+			<button hx-get="/{{.StreamID}}/intent?intent=create&content={{.Label}} {{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "share"}}</span> Share</button>
+			<button hx-get="/{{.StreamID}}/intent?intent=like&object={{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "thumbs-up"}}</span> Like</button>
+			<button hx-get="/{{.StreamID}}/intent" aria-label="Manage Accounts">{{icon "more-horizontal"}}</button>
+		</div>
+        <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
+            <ul class="pagination pagination-sm" id="pagination">
 
-	<div class="pos-absolute-bottom-left text-sm">
-		<button hx-get="/{{.StreamID}}/intent?intent=create&content={{.Label}} {{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "share"}}</span> Share</button>
-		<button hx-get="/{{.StreamID}}/intent?intent=like&object={{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "thumbs-up"}}</span> Like</button>
-		<button hx-get="/{{.StreamID}}/intent" aria-label="Manage Accounts">{{icon "more-horizontal"}}</button>
-	</div>
+            </ul>
+		</div>
+    </nav>
+
+
 </div>
+
 </div>
