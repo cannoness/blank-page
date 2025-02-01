@@ -15,13 +15,17 @@
 					tags: {type: "string"}
 					description: {type: "string"}
 					streamURL: {type: "string", format:"url"}
-					featured: {type: "boolean"}
-					explicit: {type: "boolean"}
 					imageURL: {type: "string", format: "url"}
+                    featured: {type: "boolean"}
 					filename: {type: "string"}
-					links: {type:"object", wildcard: {type:"string", format:"uri"}}
+					links: {type: "string", format: "uri"}
+					linksTo: {type: "string", format: "uri"}
+                    dateCreated: {type: "string"}
+                    favs: {type: "integer"}
+                    explicit: {type: "boolean"}
 				}
 			}
+
 		}
 	}
 
@@ -70,14 +74,18 @@
                                             {type: "text",   path: "data.imageURL", label: "File Link"},
                                             {type: "toggle", path: "isFeatured", options:{true-text:"Featured", false-text:"Featured"}}
 											{type: "toggle", path: "data.explicit", options:{true-text:"Explicit", false-text:"Explicit"}}
+                                            {type: "url", path: "data.linksTo", label: "Link To Source"}
 									]
 								}
 								{
+
 									type: layout-vertical
 									label: Metadata
 									children: [
 										{type: "text", path: "data.category", label: "Category"},
-										{type: "text", path: "data.tags", label: "Tags"},
+										{type: "text", path: "data.tags", label: "Tags"}
+										{type: "text", path: "data.dateCreated", label: "DateCreated"}
+										{type: "hidden", path: "data.favs", label: "Favs"}
 									]
 								}
 								{
