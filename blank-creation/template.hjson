@@ -18,7 +18,10 @@
 					imageURL: {type: "string", format: "url"}
                     featured: {type: "boolean"}
 					filename: {type: "string"}
-					links: {type: "string", format: "uri"}
+					links: {
+						type: object
+						wildcard:{type: "string", format:"url"}
+					}
 					linksTo: {type: "string", format: "uri"}
                     dateCreated: {type: "string"}
                     favs: {type: "integer"}

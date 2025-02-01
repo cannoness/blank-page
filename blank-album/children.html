@@ -10,7 +10,7 @@
 
 	{{- range $index, $result := $results -}}
 		<div class="container">
-			<a href={{$result.Data.links}}>
+			<a href={{$result.Data.linksTo}}>
 				<img src={{$result.Data.imageURL}} alt="">
 				<span class="title"> {{$result.Label}} </span>
 				<span class="text">
