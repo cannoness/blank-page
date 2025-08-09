@@ -1,20 +1,30 @@
 {{- $albums := (.Outbox.Where "templateId" "blank-album").ByRankAlt.Slice -}}
 {{- $isMyself := .IsMyself -}}
+{{- $label := first (.Data "label-albums") "Albums" -}}
 {{- $description := .Data "description-albums" -}}
 
 <!-- Page content -->
-<div class="framed page app padding-none" script="on load add [@aria-selected=true] to #albums">
+<div class="framed page padding-none" script="on load add [@aria-selected=true] to #albums">
 
 	{{- template "header" . -}}
 
 	<div class="padding pos-relative">
 
-		{{- if $isMyself -}}
-			<div class="button-group text-sm margin-bottom">
-				<button hx-get="/@{{.UserID}}/edit">Edit Profile</button>
-				<button hx-get="/@{{.UserID}}/add-album" aria-label="Add an Album">{{icon "add"}} Album</button>
-			</div>
-		{{- end -}}
+		<div class="flex-row flex-align-center margin-top margin-bottom-xl">
+			<a href="/@{{.Username}}" hx-boost="true" class="flex-row flex-align-center">
+				<img src="{{.IconURL}}" class="circle width-32" aria-hidden="true">
+				<span class="text-lg margin-none">{{.DisplayName}}</span>
+			</a>
+			<span class="text-lg bold margin-none">&middot; {{$label}}</span>
+
+			{{- if $isMyself -}}
+				<div class="pos-absolute-top-right text-xs">
+					<button hx-get="/@{{.UserID}}/add-album" aria-label="Add an Album">{{icon "add"}} Album</button>
+					<button hx-get="/@{{.UserID}}/edit-albums" aria-label="Edit Albums">Edit</button>
+				</div>
+			{{- end -}}
+
+		</div>
 
 		{{- if ne "" $description -}}
 			<div class="max-width-640">{{$description | markdown}}</div>
@@ -25,7 +35,6 @@
 		{{- end -}}
 	
 		<div hx-push-url="true">
-			{{- if $albums.NotEmpty -}}
 
 				<div class="sortable margin-vertical-lg columns-4">
 					{{- range $albums -}}
@@ -113,6 +122,12 @@
 
 	</div>
 
-	<div hx-get="/@{{.UserID}}/albums" hx-trigger="refreshPage from:window"></div>
+	<div
+		hx-get="/@{{.UserID}}/albums"
+		hx-trigger="refreshPage from:window"
+		hx-target="#main"
+		hx-swap="innerHTML"
+		hx-push-url="false">
+	</div>
 
 </div>

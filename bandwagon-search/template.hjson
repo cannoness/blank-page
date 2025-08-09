@@ -3,12 +3,13 @@
 	templateRole:search
 	extends:["base-intent"]
 	containedBy: []
-	model:stream
+	model:Stream
 	label:Bandwagon Search page
 	description:Search Page for Bandwagon
 	schema: {
 		type:object
 		properties: {
+			icon: {type:"string"}
 			label: {type:"string"}
 			summary: {type:"string"}
 			data: {
@@ -20,7 +21,12 @@
 			}
 		}    
 	}
-	states: {}
+	states: {
+		default: {
+			label: "Default State",
+			description: "Search templates do not use any other states"
+		}
+	}
 	roles: {}
 
 	bundles: {
@@ -49,6 +55,7 @@
 								label:Page Info
 								children: [
 									{type:"text", label:"Token", path:"token"}
+									{type:"text", label:"Icon", path:"icon"}
 									{type:"text", label:"Page Name", path:"label"}
 									{type:"textarea", label:"Description", path:"summary"}
 								]
@@ -64,8 +71,7 @@
 						]
 					}
 				}
-				{do: "save-and-publish"}
-				{do:"save", message:"Created by {{.Author.DisplayName}}"}
+				{do:"save"}
 				{do:"forward-to", url:"/{{.StreamID}}/edit"}
 			]
 		}
@@ -86,6 +92,7 @@
 									children: [
 										{type:"text", readOnly:true, label:"Template Type", path:"templateId"}
 										{type:"text", label:"Token", path:"token"}
+										{type:"text", label:"Icon", path:"icon"}
 										{type:"text", label:"Page Name", path:"label"}
 										{type:"textarea", label:"Description", path:"summary"}
 									]
@@ -102,10 +109,11 @@
 						}
 					}
 				]}
-				{do: "save-and-publish", message:"Edited by {{.Author.DisplayName}}"}
+				{do: "save-and-publish", state:"default", message:"Edited by {{.Author.DisplayName}}"}
 				{do: "refresh-page"}
 			]
 		}
+
 		delete: {
 			roles: ["owner"]
 			steps: [
@@ -113,27 +121,22 @@
 				{do:"forward-to", url:"/{{.ParentID}}"}
 			]
 		}
-		sharing: {
-			roles: ["owner"]
-			steps: [
-				{do:"as-modal", steps: [
-					{do:"set-simple-sharing", roles: ["viewer"], title:"Who Can See This Article?", message:"Select who can view and comment on this article."}
-					{do:"save", message:"Sharing updated by {{.Author}}"}
-				]}
-			]
-		}
 
 		view: {
+			roles: ["anonymous"]
 			steps:[
 				{do:"view-html"}
 			]
 		}
+
 		view-results: {
+			roles: ["anonymous"]
 			steps:[
 				{do:"view-html"}
 			]
 		}
 		view-suggestions: {
+			roles: ["anonymous"]
 			steps:[
 				{do:"view-html"}
 			]

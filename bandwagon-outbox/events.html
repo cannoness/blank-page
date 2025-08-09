@@ -1,109 +1,112 @@
-{{- $events := (.Outbox.Where "templateId" "bandwagon-event").ByRankAlt.Slice -}}
+{{- $events := .Outbox.ByStartDate -}}
+{{- $events := $events.Where "templateId" "bandwagon-event" -}}
+{{- $showCurrent := ne "past" (.QueryParam "view") -}}
+
+{{- if $showCurrent -}}
+	{{- $events = $events.WhereGT "startDate" today -}}
+{{- else -}}
+	{{- $events = $events.WhereLT "startDate" today -}}
+{{- end -}}
+
+{{- $events := $events.Slice -}}
+{{- $root := . -}}
 {{- $isMyself := .IsMyself -}}
+{{- $label := first (.Data "label-events") "Shows" -}}
 {{- $description := .Data "description-events" -}}
 
-<div class="framed page app padding-none" script="on load add [@aria-selected=true] to #events">
+<div class="framed page padding-none" script="on load add [@aria-selected=true] to #events">
 
 	{{- template "header" . -}}
 
 	<div class="padding pos-relative">
+
+		<div class="flex-row flex-align-center margin-top margin-bottom-lg">
+			<a href="/@{{.Username}}" hx-boost="true" class="flex-row flex-align-center">
+				<img src="{{.IconURL}}" class="circle width-32" aria-hidden="true">
+				<span class="text-lg margin-none">{{.DisplayName}}</span>
+			</a>
+			<span class="text-lg bold margin-none">&middot; {{$label}}</span>
+
+			{{- if $isMyself -}}
+				<div class="pos-absolute-top-right text-sm">
+					<button hx-get="/@{{.UserID}}/add-event">{{icon "add"}} Show</button>
+					<button hx-get="/@{{.UserID}}/edit-events">Edit</button>
+				</div>
+			{{- end -}}
 	
-		{{- if $isMyself -}}
-			<div class="button-group text-sm margin-bottom">
-				<button hx-get="/@{{.UserID}}/edit">Edit Profile</button>
-				<button hx-get="/@{{.UserID}}/add-event" class="text-sm" aria-label="Add an Event">{{icon "add"}} Event</button>
-			</div>
-		{{- end -}}
+		</div>
 
 		{{- if ne "" $description -}}
 			<div class="max-width-640 margin-bottom-lg">{{$description | markdown}}</div>
 		{{- end -}}
 
-		{{- if $events.NotEmpty -}}
-			{{- if $isMyself -}}
-				<form hx-post="/@{{.UserID}}/sort-children" hx-trigger="end" hx-swap="none" hx-push-url="false">
+		<div role="tablist" class="pills text-sm" hx-swap="innerHTML show:window:top">
+			{{- if $showCurrent -}}
+				<span role="tab" aria-selected="true">Upcoming Shows</span>
+				<a role="tab" href="/@{{.Username}}/events?view=past" hx-boost="true">Past</a>
+			{{- else -}}
+				<a role="tab" href="/@{{.Username}}/events" hx-boost="true">Upcoming</a>
+				<span role="tab" aria-selected="true">Past Shows</span>
+			{{- end -}}
+		</div>
+
+		<div class="table">
+	
+			{{- range $events -}}
+
+				{{- $backgroundColor := .Data.color.page | string | parseColor -}}
+				{{- $textColor := $backgroundColor.TextExt -}}
+				{{- $venue := .Places.First -}}
+
+				<div class="pos-relative hover-trigger">
+					<a href="/{{.StreamID}}" hx-boost="true" class="block text-plain text-nocolor flex-row">
+
+						<div class="width-128 flex-shrink-0 margin-right">
+							{{- if ne "" .IconURL -}}
+								<img src="{{.IconURL}}" class="rounded square width-100%">
+							{{- end -}}
+						</div>
+						<div class="flex-column">
+							<div class="bold text-gray">{{.Data.city}}</div>
+							<div class="text-xl margin-none bold">{{.StartDate | longDate}}</div>
+							<div class="flex-grow margin-vertical">
+								{{- $venueName := $venue.Name -}}
+								{{- if ne "" $venueName -}}
+									<span class="bold">{{- $venueName -}}</span>
+								{{ end -}}
+
+								{{- if .StartDate.NotMidnight -}}
+									<span class="text-gray">
+										{{- if ne "" $venueName }}
+											at
+										{{ end -}}
+										{{.StartDate | shortTime}}
+									</span>
+								{{ end -}}
+							</div>
+							<div class="margin-top link">More Info &rarr;</div>
+						</div>
+					</a>
+
+					{{- if $isMyself -}}
+						<div class="pos-absolute-top-right text-sm hover-show">
+							<button hx-get="/{{.StreamID}}/edit">Edit Show</button>
+						</div>
+					{{- end -}}
+				</div>
+				
 			{{- end -}}
 
-			<div class="sortable columns-4">
-				{{- range $events -}}
-					<div class="card flex-column padding hover-trigger" script="install blockselect()">
-						<div>
-							<span class="bold">{{.Data.date}}</span>
-						</div>
-						<div class="text-xl margin-none bold">{{.Data.city}}</div>
-						<div class="flex-grow margin-bottom bold">{{.Data.venue}}</div>
-						{{- if ne nil .Data.website -}}
-							{{ $websiteLabel := first .Data.websiteLabel "Get Tickets"}}
-							<div class="margin-top">
-								<a href="{{.Data.website}}" target="_blank" class="bold hover-underline">{{$websiteLabel}}</a>
-							</div>
-						{{- end -}}
-
-						{{- if $isMyself -}}
-							<button class="hover-show pos-absolute-top-left text-xs drag-handle">{{icon "drag-handle"}}</button>
-							<button hx-get="/{{.StreamID}}/edit" class="hover-show pos-absolute-top-right text-xs">Edit</button>
-							<input type="hidden" name="keys" value="{{.StreamID}}">
-						{{- end -}}
-
-					</div>
-				{{- end -}}
-			</div>
-		{{- else -}}
-			<div class="margin-top columns-3">
-				<div class="card padding clickable bold align-center" role="button" hx-get="/@{{.UserID}}/add-event">
-					<div class="text-3xl margin-sm">{{icon "add"}}</div>
-					Click here to add your first event
-				</div>
-
-				{{- range seq 5 -}}
-					<div class="card card-dashed padding text-light-gray align-center">
-						<div class="text-3xl margin-sm">&hellip;</div>
-						Coming Soon...<br><br>
-					</div>
-				{{- end -}}
-			</div>
-		{{- end -}}
-
-		{{- if $isMyself -}}
-			</form>
-
-			<script src="/.themes/global/resources/sortable-1.15.0/Sortable.min.js"></script>
-
-			<script>
-				var sortables = document.querySelectorAll(".sortable");
-				for (var node of sortables) {
-					new Sortable(node, {
-						handle: ".drag-handle",
-						animation: 150,
-						whisperClass: 'draggable-whisper'
-					});
-				}
-			</script>
-
-			<style>
-				.draggable {
-					padding:10px 20px;
-					border: solid 1px var(--gray10);
-					background-color: var(--gray00);
-					color: var(--gray80);
-					margin-bottom: -1px;
-					cursor: grab;
-				}
-
-				.drag-handle {
-					cursor:grab;
-				}
-
-				.draggable-whisper {
-					background-color: var(--gray50);
-					color:var(--gray50);
-					cursor: grabbing;
-				}
-			</style>
-
-		{{- end -}}
+		</div>
 
 	</div>
 
-	<div hx-get="/@{{.UserID}}/events" hx-trigger="refreshPage from:window"></div>
+	<div 
+		hx-get="/@{{.UserID}}/events" 
+		hx-trigger="refreshPage from:window" 
+		hx-target="#main" 
+		hx-swap="innerHTML"
+		hx-push-url="false">
+	</div>
+
 </div>

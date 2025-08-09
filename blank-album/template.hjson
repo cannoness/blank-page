@@ -2,8 +2,8 @@
 	templateId: blank-album
 	templateRole: album
 	model: Stream
-	containedBy: ["folder", "home", "outbox"]
-	extends: ["base-intent"]
+	containedBy: ["outbox"]
+	extends: ["base-checkout", "base-intent", "blank-common"]
 	icon: album
 	label: Album (Default)
 	description: Contains one or more creations.
@@ -14,12 +14,15 @@
 		type:object
 		properties: {
 			label: {type:"string", required: true}
-			description: {type:"string", format:"html"}
-			iconURL: {type:"string", format:"uri"}
+			description: {type:"string", format:"html", maxLength:2048}
+			iconUrl: {type:"string", format:"url"}
+			syndication: {type:"array", items:{type:"string"}}
 			data: {
 				type:object
 				properties: {
-					imageFilename: {type:"string", maxlength:255}
+					checkoutLabel: {type:"string", maxLength:255}
+					license: {type:"string"}
+					imageFilename: {type:"string", maxLength:255}
 					tags: {type:"string"}
 					category: {type:"string"}
                     iconUrl: {type:"string", format:"uri"}
@@ -34,9 +37,33 @@
 		}
 	}
 
+	states: {
+		default: {
+			label: Default,
+			description: This item is not visible on the website
+		}
+
+		published: {
+			label: Published,
+			description: This item has been published and is visible on the website
+		}
+	}
+	roles: {
+		paid: {
+			label: Paid Album
+			description: Select the products that give special access to paid purchasers and subscribers
+			privileged: true
+		}
+	}
+
+	bundles: {
+		javascript: {contentType: "text/javascript"}
+	}
+
 	socialRole: Album
 	socialRules: [
 
+		{target:"content", expression:"{{ markdown .Summary }}"}
 		{target:"links", forEach:"data.links", rules:[
 			{target:"label", path:"key"}
 			{target:"rel", value:"alternate"}
@@ -57,36 +84,19 @@
 		iconUrl:""
 		description:""
 		text: "{{.Label}} {{.Summary}} {{index .Data `tags`}}"
-	}
-
-	states: {
-		unpublished: {
-			label:"Default State"
-			description:"Visible only to Authors and Owners"
-		}
-		published: {
-			label:"Published"
-			description:"Visible to all people with permissions"
-		}
-	}
-	bundles: {
-		javascript: {contentType: "text/javascript"}
-        stylesheet: {
-			content-type:"text/css"
-		}
-	}
+    }
 
 	actions: {
 		create: {
 			roles:["author"]
 			steps: [
-				{do: "as-modal", steps: [
-					{do: "set-data", from-url:["isFeatured"]}
+				{do:"as-modal", steps: [
+					{do:"set-data", from-url:["isFeatured"]}
 					{
 						do: edit
 						form: {
 							label: + Add an Album
-							type: layout-tabs
+							type:layout-tabs
 							children: [
 								{
 									type:layout-vertical
@@ -101,8 +111,8 @@
 									type:layout-vertical
 									label: Metadata
 									children: [
-										{type:"textarea", path:"data.tags", label:"Genres / Tags", description:"Enter genres as hashtags, separated by spaces"}
-										{type:"textarea", path:"description", label:"Notes", options:{rows:8}, description:"Notes appear on the side of the album page. Markdown is allowed."}
+										{type:"textarea", path:"summary", label:"Sidebar Notes", description:"Notes appear on the side of the album page. Markdown is allowed.", options:{rows:8, showLimit:true}}
+										{type:"textarea", path:"data.tags", label:"Tags", description:"Enter #Hashtags separated by spaces."}
 									]
 								}
 								{
@@ -134,23 +144,27 @@
 						}
 					}
 				]}
-				{do: "upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
-				{do: "process-tags", paths:"data.tags"}
-				{do: "save"}
-				{do: "forward-to", url: "/{{.StreamID}}/view"}
+				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
+				{do:"process-tags", paths:"data.tags"}
+				{do:"save"}
+				{do:"forward-to", url: "/{{.StreamID}}/view"}
 			]
 		}
+
 		view: {
-			roles: ["editor", "owner"]
+			roles: ["author"]
 			stateRoles: {
 				published: ["anonymous"]
 			}
-			do: "view-html"
+			steps:[
+				{do: "view-html"}
+			]
 		}
+
 		edit: {
 			roles: ["author"]
 			steps: [
-				{do: "as-modal", steps: [
+				{do:"as-modal", steps: [
 					{
 						do: edit
 						options: ["delete:/{{.StreamID}}/delete"]
@@ -163,7 +177,7 @@
 									label: General
 									children: [
 										{type:"text", path:"label", label:"Album Name"}
-										{type:"upload", path:"iconUrl", label:"Album Art", options:{accept:"image/*", filename:"data.imageFilename", rules:{width:800, height:800}}}
+									    {type:"upload", path:"iconUrl", label:"Album Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
 										{type:"toggle", path:"isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured?"}}
 									]
 								}
@@ -171,8 +185,8 @@
 									type:layout-vertical
 									label: Metadata
 									children: [
-										{type:"textarea", path:"data.tags", label:"Genres / Tags", description:"Enter genres as #hashtags separated by spaces"}
-										{type:"textarea", path:"description", label:"Notes", options:{rows:8}, description:"Notes appear on the side of the album page. Markdown is allowed."}
+										{type:"textarea", path:"summary", label:"Sidebar Notes", description:"Notes appear on the side of the album page. Markdown is allowed.", options:{rows:8, showLimit:true}}
+										{type:"textarea", path:"data.tags", label:"Tags", description:"Enter #Hashtags separated by spaces"}
 									]
 								}
 								{
@@ -203,44 +217,50 @@
 									type:"layout-vertical"
 									label:"Distribution"
 									children:[
-										{type:"multiselect", path:"syndication", label:"Distribute to these indie streaming services", description:"These services will be notified when this album is published", options:{provider:"syndication-targets"}}
+										{type:"multiselect", path:"syndication", label:"Distribute to these streaming services", description:"These services will be notified when this album is published.", options:{provider:"syndication-targets"}}
 									]
 								}
 							]
 						}
 					}
 				]}
-				{do: "upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1}
-				{do: "process-tags", paths:"data.tags"}
-				{do: "if", condition: "{{.IsPublished}}",
+				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1}
+				{do:"process-tags", paths:"data.tags"}
+				{do:"search-index"}
+
+				{do:"if", condition: "{{.IsPublished}}",
 					then: [
-						{do:"search-index", text:"{{.Label}} {{.Summary}}"}
 						{do:"save-and-publish"}
 					],
 					else: [
-						{do:"search-index", action:"delete"}
 						{do:"save"}
 					]
 				}
-				{do: "refresh-page"}
+				{do:"refresh-page"}
+			]
+		}
+
+		image: {
+			steps:[
+				{do:"view-attachment", category:"image", format:["webp", "jpeg", "gif"], width:800, height:800}
 			]
 		}
 
 		delete: {
 			roles: ["author"]
 			steps: [
-				{do: "delete"}
-				{do:"search-index", action:"delete"}
-				{do: "forward-to", url: "/@{{.AttributedTo.UserID.Hex}}"}
+				{do:"delete"}
+				{do:"search-index"}
+				{do:"forward-to", url: "/@{{.AttributedTo.UserID.Hex}}"}
 			]
 		}
 
 		delete-icon: {
 			roles: ["author"]
 			steps: [
-				{do: "delete-attachments"}
-				{do: "set-data", values:{"iconUrl": ""}}
-				{do: "save"}
+				{do:"delete-attachments"}
+				{do:"set-data", values:{"iconUrl": ""}}
+				{do:"save"}
 			]
 		}
 
@@ -254,27 +274,29 @@
 					location: child
 					title: + Add a Creation Link
 					type:blank-creation
+					with-data:{
+						"data.artist":"{{.AttributedTo.Name}}""data.tags":"{{.Data `tags`}}"
+					}
 				}
+			//	{do:"set-header", name:"Hx-Retarget", value:"main"}
+			//	{do:"set-header", name:"Hx-Reswap", value:"innerHTML"}
+			//	{do:"set-header", name:"Hx-Push-Url", value:"false"}
+				{do:"add-event", event:"songAdded"}
+				{do:"remove-event", event:"refreshPage"}
+			//	{do:"view-html", method:"post", file:"view"}
 			]
 		}
 
 		sort-tracks: {
 			roles: ["author"]
 			steps: [
-				{do: "sort", model:"Stream", keys:"_id", values:"rank"}
-				{do: "refresh-page"}
-			]
-		}
-
-		links: {
-			steps:[
-				{do: "as-modal", steps:[
-					{do: "view-html"}
-				]}
+				{do:"sort", model:"Stream", keys:"_id", values:"rank"}
+				{do:"refresh-page"}
 			]
 		}
 
 		stylesheet: {
+			roles:["anonymous"]
 			steps: [
 				{do:"cache-url"}
 				{do:"view-css"}
@@ -282,18 +304,28 @@
 		}
 
 		upload: {
+			roles: ["author"]
 			steps: [
-				{do: "as-modal", steps:[
+				{do:"as-modal", steps:[
 					{do:"view-html"}
-					{do:"upload-attachments", category:"other", maximum:8, fieldname:"file", label-fieldname:"label", description-fieldname:"description"}
+					{do:"edit", form:{
+						type:"layout-vertical"
+						children:[
+							{type:"text", path:"attachmentLabel", label:"Label"}
+							{type:"textarea", path:"attachmentDescription", label:"Description", description:"A few words to show underneath the filename."}
+							{type:"upload", path:"file", label:"Attachment"}
+						]
+					}, options:["submit-label:Upload Attachment"]}
+					{do:"upload-attachments", category:"other", maximum:8, fieldname:"file", label-fieldname:"attachmentLabel", description-fieldname:"attachmentDescription"}
 					{do:"refresh-page"}
 				]}
 			]
 		}
 
 		edit-upload: {
+			roles: ["author"]
 			steps: [
-				{do: "as-modal", steps:[
+				{do:"as-modal", steps:[
 					{do:"with-attachment", steps:[
 						{
 							do:"edit",
@@ -318,6 +350,7 @@
 		}
 
 		delete-upload: {
+			roles: ["author"]
 			steps: [
 				{do:"as-confirmation", title:"Delete this Attachment?", message:"Are you sure you want to delete this attachment? There is NO UNDO.", submit:"DELETE"}
 				{do:"delete-attachments"}
@@ -329,25 +362,41 @@
 			roles: ["author"]
 			steps: [
 				{do:"as-modal", steps:[
-					{
-						do: edit
-						form: {
-							type: layout-vertical
-							label: Publish this Album?
-							children:[
-								{type:"select", path:"isFeatured", label:"Feature on Home Page", options:{enum:[{value:"false", label:"NO. Do not show on my home page"}, {value:"true", label:"YES. Show on my home page"}]}}
-								{type:"multiselect", path:"syndication", label:"Distribute to Streaming Stations", description:"Share this album with indie streaming services", options:{provider:"syndication-targets"}}
-							]
-						},
-						options:["submit-label:Publish Album"]
-					}
-					{do:"set-state", state:"published"}
-					{do:"save-and-publish", outbox:"true"}
-					{do:"search-index"}
-					{do:"with-children", steps:[
-						{do:"search-index"}
+					{do:"if", condition:"{{eq `true` (.QueryParam `republish`)}}",
+					then:[
+						{
+							do: edit
+							form: {
+								type: layout-vertical
+								label: Re-Publish this Album?
+								description: "If you've made changes to this album, you can send updates to all distribution channels.",
+								children:[
+									{type:"select", path:"data.license", label:"License", options:{required:true, provider:"bandwagon-album.licenses"}}
+									{type:"select", path:"isFeatured", label:"Feature on Home Page", options:{enum:[{value:"false", label:"NO. Do not show on my home page"}, {value:"true", label:"YES. Show on my home page"}]}}
+									{type:"multiselect", path:"syndication", label:"Distribute to Streaming Stations", description:"Share this album with indie streaming services", options:{provider:"syndication-targets"}}
+								]
+							},
+							options:["submit-label:Publish Album"]
+						}
+					],
+					else:[
+						{
+							do: edit
+							form: {
+								type: layout-vertical
+								label: Publish this Album?
+								children:[
+									{type:"select", path:"data.license", label:"License", options:{required:true, provider:"bandwagon-album.licenses"}}
+									{type:"select", path:"isFeatured", label:"Feature on Home Page", options:{enum:[{value:"false", label:"NO. Do not show on my home page"}, {value:"true", label:"YES. Show on my home page"}]}}
+									{type:"multiselect", path:"syndication", label:"Distribute to Streaming Stations", description:"Share this album with indie streaming services.", options:{provider:"syndication-targets"}}
+								]
+							},
+							options:["submit-label:Publish Album"]
+						}
 					]}
-
+					{do:"set-state", state:"published"}
+					{do:"save-and-publish", outbox:"true", republish:true}
+					{do:"search-index"}
 					{do:"make-archive", token:"FULL-ALBUM", depth:1, json:true, attachments:true, metadata: [
 					
 						// metadata for album attachments
@@ -373,52 +422,103 @@
 			]
 		}
 
-		children: {
-			roles:["owner", "editor", "viewer"]
-			do:"view-html"
-		}
-		attachments: {
-			roles: ["owner", "editor"]
-			steps: [
-				{do:"add-stream", location:"child", template:"blank-creation"}
-				{do:"refresh-page"}
-			]
-		}
-		properties: {
-			roles: ["owner", "editor"]
-			steps: [
-				{do:"as-modal", steps: [
-					{
-					do:"edit"
-					form: {
-						type:"layout-vertical"
-						label:"Edit Photo Album"
-						description:""
-						children: [
-							{type:"text", path:"label", label:"Label"}
-							{type:"textarea", path:"summary", label:"Summary", cssClass:"height300"}
-						]
-					}}
-					{do:"save", comment:"Updated by {{.Author}}"}
-				]}
-			]
-		}
 		unpublish: {
 			roles: ["author"]
 			steps: [
-				{do: "as-confirmation", title:"Un-Publish this Album?", message:"Un-Publishing this album will hide it everyone online.  You'll still be able to edit and make changes to it, but others will not see it.", submit:"Un-Publish from Website "}
-				{do: "set-state", state:"unpublished"}
-				{do: "unpublish", outbox:"true"}
-				{do: "delete-archive", token:"FULL-ALBUM"}
-				{do:"with-children", steps:[
-					{do:"search-index", action:"delete"}
+				{do:"as-modal", steps:[
+					{do:"view-html"}
+					{do:"unpublish", state:"default", outbox:"true"}
+					{do:"search-index"}
+					{do:"delete-archive", token:"FULL-ALBUM"}
+					{do:"refresh-page"}
 				]}
+			]
+		}
 
-				{do: "refresh-page"}
+		icon: {
+			roles:["anonymous"]
+			steps: [
+				{do:"redirect-to", url:"{{.IconURL}}"}
+			]
+		}
+
+		premium-downloads: {
+			roles:["paid"]
+			steps: [
+				{do:"as-modal", steps:[
+					{do:"view-html"}
+				]}
+			]
+		}
+
+		edit-paid-content: {
+			roles: ["author", "editor"]
+			steps: [
+				{do:"view-html"}
+			]
+		}
+
+		upload-paid-attachment: {
+			roles: ["author", "editor"]
+			steps: [
+				{do:"as-modal", steps:[
+					{
+						do:"edit"
+						form:{
+							type:"layout-vertical"
+							label:"Upload an Exclusive File"
+							children:[
+								{type:"text", path:"attachmentLabel", label:"Label"}
+								{type:"textarea", path:"attachmentDescription", label:"Description", description:"A few words to show underneath the filename."}
+								{type:"upload", path:"file", label:"Attachment"}
+							]
+						},
+						options:["submit-label:Upload Exclusive File"]
+					}
+					{do:"upload-attachments", category:"paid", maximum:6, fieldname:"file", label-fieldname:"attachmentLabel", description-fieldname:"attachmentDescription"}
+					{do:"refresh-page"}
+				]}
+			]
+		}
+
+		edit-paid-attachment: {
+			roles: ["author", "editor"]
+			steps: [
+				{do:"with-attachment", steps:[
+					{do:"as-modal", steps:[
+						{
+							do:"edit"
+							form:{
+								type:"layout-vertical"
+								label:"Edit Exclusive File Info"
+								children:[
+									{type:"text", path:"label", label:"Download Label"}
+									{type:"textarea", path:"description", label:"Description", description:"A few words to show underneath the filename.", options:{rows:8}}
+								]
+							}
+							options:[
+								"endpoint:/{{.ObjectID}}/edit-paid-attachment?attachmentId={{.AttachmentID}}",
+								"delete:/{{.ObjectID}}/delete-paid-attachment?attachmentId={{.AttachmentID}}"
+							]
+						}
+						{do:"save"}
+						{do:"refresh-page"}
+					]}
+				]}
+			]
+		}
+
+		delete-paid-attachment: {
+			roles: ["author", "editor"]
+			steps: [
+				{do:"as-confirmation", title:"Delete this Exclusive File?", message:"Are you sure you want to delete this file? There is NO UNDO.", submit:"Delete File"}
+				{do:"delete-attachments", category:"paid"}
+				{do:"refresh-page"}
 			]
 		}
 
 		zip9348103752: {
+			roles:["anonymous"]
 			steps: [
 				{do:"get-archive", token:"FULL-ALBUM", depth:1, json:true, attachments:true, metadata: [
 					

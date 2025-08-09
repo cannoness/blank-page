@@ -1,16 +1,27 @@
 {
 	templateId: bandwagon-song
 	templateRole: song
+	model: Stream
 	label: Song
-	extends: ["base-intent"]
+	extends: ["base-intent", "bandwagon-common"]
 	containedBy: ["album"]
+
+	states: {
+		published: {
+			label: Published,
+			description: This item has been published and is visible on the website
+		}
+	}
+
 	schema: {
 		type: object
 		properties: {
 			label: {type: "string", required: true}
+			iconUrl: {type:"string", format:"url"}
 			data: {
 				type: object 
 				properties: {
+					tags: {type:"string"}
 					length: {type: "string"}
 					genre: {type: "string"}
 					artist: {type: "string"}
@@ -18,6 +29,7 @@
 					producer: {type: "string"}
 					publisher: {type: "string"}
 					isrc: {type: "string"}
+					license: {type: "string"}
 					lyrics: {type: "string"}
 					streamURL: {type: "string", format:"url"}
 					featured: {type: "boolean"}
@@ -34,7 +46,6 @@
 	}
 
 	socialRole: Audio
-	searchText: "{{.Label}} {{index .Data `lyrics`}}"
 	socialRules: [
 		{target:"@context", append:"https://funkwhale.audio/ns"}
 		{target:"type", value:"Audio"}
@@ -55,15 +66,19 @@
 		{target:"library", expression:"{{.ParentURL}}/pub/children"}
 	]
 
-	searchRules: [
-		{target:"type", value:"Audio"}
-		{target:"fullText", expression:"{{.Label}} {{index .Data `lyrics`}}"}
-		{target:"icon", expression:""}
-	]
+	search: {
+		type: Audio
+		iconUrl:"{{first .IconURL (join `/` .ParentID.Hex `/icon`)}}"
+		summary:""
+		text: "{{.Label}} {{.AttributedTo.Name}} {{index .Data `lyrics`}}"
+		tags: "LIC:{{index .Data `license`}}"
+	}
+
+	tagPaths: ["data.tags"]
 
 	actions: {
 		create: {
-			roles: ["admin", "author"]
+			roles: ["author"]
 			steps: [
 				{do:"as-modal", steps:[
 					{
@@ -77,9 +92,17 @@
 									label: General
 									children: [
 										{type: "text",   path: "label", label: "Song Title"},
-										{type: "text",   path: "data.length", label: "Length"},
 										{type: "upload", path: "data.attachmentId", label: "Audio File", options:{filename:"data.attachmentFilename", accept:"audio/*"}},
-										{type: "toggle", path: "isFeatured", options:{true-text:"Featured", false-text:"Featured"}}
+										{type: "upload", path: "iconUrl", label:"Cover Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
+										{type: "text",   path: "data.length", label: "Length"},
+										{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on track list", false-text:"Featured?"}}
+									]
+								}
+								{
+									type: layout-vertical
+									label: Description
+									children: [
+										{type: "textarea", path: "data.lyrics", description:"Enter lyrics or song description.  Displays on this song's detail page.", options:{rows: 16}}
 										{type: "toggle", path: "data.explicit", options:{true-text:"Explicit Lyrics", false-text:"Explicit Lyrics"}}
 									]
 								}
@@ -87,6 +110,8 @@
 									type: layout-vertical
 									label: Metadata
 									children: [
+										{type: "select", path: "data.license", label: "License", options:{provider:"bandwagon-album.licenses"}},
+										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."},
 										{type: "text", path: "data.genre", label: "Genre"},
 										{type: "text", path: "data.artist", label: "Artist"},
 										{type: "text", path: "data.composer", label: "Composer"},
@@ -113,30 +138,26 @@
 										{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
 									]
 								}
-								{
-									type: layout-vertical
-									label: Lyrics
-									children: [
-										{type: "textarea", path: "data.lyrics", description:"Enter lyrics to display on a song's detail page", options:{rows: 16}}
-									]
-								}
 							]
 						}
 					}
 				]}
+				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
 				{do:"upload-attachments", action:"replace", category:"Audio", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"audio/*", maximum:1}
-				{do:"save-and-publish"}
+				{do:"process-tags", paths:"data.tags"}
+				{do:"save-and-publish", outbox:false}
 				{do:"search-index"}
-				{do:"forward-to", url:"/{{.StreamID}}"}
+				{do:"refresh-page"}
 			]
 		}
 		view: {
+			roles: ["anonymous"]
 			steps: [
 				{do:"view-html"}
 			]
 		}
 		edit: {
-			roles: ["admin", "author"]
+			roles: ["author"]
 			steps: [
 				{
 					do:"as-modal",
@@ -153,9 +174,17 @@
 										label: General
 										children: [
 											{type: "text",   path: "label", label: "Song Title"},
-											{type: "text",   path: "data.length", label: "Length"},
 											{type: "upload", path: "data.attachmentId", label: "Audio File", options:{filename:"data.attachmentFilename", accept:"audio/*"}},
-											{type: "toggle", path: "isFeatured", options:{true-text:"Featured", false-text:"Featured"}}
+											{type: "upload", path: "iconUrl", label:"Cover Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
+											{type: "text",   path: "data.length", label: "Length"},
+											{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on track list", false-text:"Featured?"}}
+										]
+									}
+									{
+										type: layout-vertical
+										label: Description
+										children: [
+											{type: "textarea", path: "data.lyrics", description:"Enter lyrics or song description.  Displays on this song's detail page.", options:{rows: 16}}
 											{type: "toggle", path: "data.explicit", options:{true-text:"Explicit Lyrics", false-text:"Explicit Lyrics"}}
 										]
 									}
@@ -163,12 +192,14 @@
 										type: layout-vertical
 										label: Metadata
 										children: [
+											{type: "select", path: "data.license", label: "License", options:{provider:"bandwagon-album.licenses"}},
+											{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."},
 											{type: "text", path: "data.genre", label: "Genre"},
-											{type: "text", label: "Artist", path: "data.artist"},
-											{type: "text", label: "Composer", path: "data.composer"},
-											{type: "text", label: "Producer", path: "data.producer"},
+											{type: "text", path: "data.artist", label: "Artist"},
+											{type: "text", path: "data.composer", label: "Composer"},
+											{type: "text", path: "data.producer", label: "Producer"},
 											{type: "text", path: "data.publisher", label: "Publisher"},
-											{type: "text", label: "ISRC", path: "data.isrc"},
+											{type: "text", path: "data.isrc", label: "ISRC"},
 										]
 									}
 									{
@@ -189,19 +220,14 @@
 											{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
 										]
 									}
-									{
-										type: layout-vertical
-										label: Lyrics
-										children: [
-											{type: "textarea", path: "data.lyrics", options:{rows: 16}}
-										]
-									}
 								]
 							}
 						}
 					]
 				}
+				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
 				{do:"upload-attachments", action:"replace", category:"Audio", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"audio/*", maximum:1}
+				{do:"process-tags", paths:"data.tags"}
 				{do:"save-and-publish"}
 				{do:"search-index"}
 				{do:"refresh-page"}
@@ -209,14 +235,23 @@
 		}
 
 		delete: {
-			roles: ["admin", "author"]
+			roles: ["author"]
 			steps: [
 				{do:"delete", title:"Delete this Song?"}
 				{do:"refresh-page"}
 			]
 		}
 
+		delete-icon: {
+			roles: ["author"]
+			steps: [
+				{do: "delete-attachments"}
+				{do: "set-data", values:{"iconUrl": ""}}
+				{do: "save"}
+			]
+		}
 		prev: {
+			roles: ["anonymous"]
 			steps:[
 				{do:"with-prev-sibling", steps:[
 					{do:"redirect-to", url:"/{{.StreamID}}"}
@@ -225,10 +260,17 @@
 		}
 
 		next: {
+			roles: ["anonymous"]
 			steps:[
 				{do:"with-next-sibling", steps:[
 					{do:"redirect-to", url:"/{{.StreamID}}"}
 				]}
+			]
+		}
+
+		audio: {
+			steps:[
+				{do:"view-attachment", category:"Audio", format:["ogg", "mp3"], bitrate:128}
 			]
 		}
 	}

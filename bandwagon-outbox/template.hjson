@@ -4,6 +4,7 @@
 	model: User
 	label: Bandwagon Outbox
 	extends: ["user-outbox"]
+
 	schema: {
 		type: object
 		properties: {
@@ -26,12 +27,34 @@
 					description-events: {type:"string"}
 					description-news: {type:"string"}
 					background-body: {type:"string", format:"uri"}
-					color-body: {type:"string", format:"color"},
-					color-menu: {type:"string", format:"color"},
-					color-page: {type:"string", format:"color"},
+					stylesheet: {type:"string"}
+					color-body: {type:"string", format:"color"}
+					color-banner: {type:"string", format:"color"}
+					color-menu: {type:"string", format:"color"}
+					color-page: {type:"string", format:"color"}
 					color-button: {type:"string", format:"color"}
 				}
 			}
+		}
+	}
+
+	states: {
+		default: {
+			label: Default State,
+			description: This template does not use states
+		}
+		"WIZARD-STEP-1": {
+			label: Step 1 of 3
+		}
+		"WIZARD-STEP-2": {
+			label: Step 2 of 3
+		}
+		"WIZARD-STEP-3": {
+			label: Step 3 of 3
+		}
+		LIVE: {
+			label: Live
+			description: This template is visible to all viewers
 		}
 	}
 
@@ -40,26 +63,62 @@
 	actions: {
 
 		create: {
+			roles: ["self"]
 			steps:[
 				{
 					do:"set-data",
 					values:{
-						"data.label-albums":"Albums",
-						"data.label-events":"Events",
-						"data.label-news":"News",
-						"data.label-shop":"Shop",
+						"data.label-albums":"Albums"
+						"data.label-events":"Events"
+						"data.label-news":"News"
+						"data.label-shop":"Shop"
 					}
 				}
 			]
 		}
 
-		view: {do:"view-html", file:"outbox"}
-		albums: {do:"view-html"}
-		events: {do:"view-html"}
-		news: {do:"view-html"}
+		view: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-html", file:"outbox"}
+			]
+		}
+
+		subscribe: {
+			roles: ["self"]
+			stateRoles: {
+				"LIVE": ["anonymous"]
+			}
+			steps: [
+				{do:"as-modal", background:"view", steps:[
+					{do:"view-html"}
+				]}
+			]
+		}
+
+		albums: {
+			roles: ["anonymous"]
+			steps:[
+				{do:"view-html"}
+			]
+		}
+
+		events: {
+			roles: ["anonymous"]
+			steps:[
+				{do:"view-html"}
+			]
+		}
+
+		news: {
+			roles: ["anonymous"]
+			steps:[
+				{do:"view-html"}
+			]
+		}
 
 		add-album: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{
 					do: add-stream
@@ -68,6 +127,7 @@
 					template: blank-album
 					label: + Create Album
 					set-permissions: {copy:true, editor:["self"]}
+					with-data:{data.tags:"{{.Data `tags`}}"}
 				}
 				{do:"set-data", values:{"data.show-albums":"true"}}
 				{do:"save"}
@@ -76,7 +136,7 @@
 		}
 
 		add-event: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{
 					do: add-stream
@@ -85,6 +145,7 @@
 					template: bandwagon-event
 					title: + Add a Song
 					set-permissions: {copy:true, editor:["self"]}
+					with-data:{data.tags:"{{.Data `tags`}}"}
 				}
 				{do:"set-data", values:{"data.show-events":"true"}}
 				{do: "save"}
@@ -93,7 +154,7 @@
 		}
 
 		add-news: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{
 					do: add-stream
@@ -110,7 +171,7 @@
 		}
 
 		edit: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{do: "as-modal", background:"view", steps:[
 					{
@@ -124,32 +185,49 @@
 									label: Basics
 									children: [
 										{type:"text", path:"displayName", label:"Name", description:"Displayed wherever someone sees your profile. (PUBLIC)"}
-										{type:"textarea", path:"statusMessage", label:"About Me", description:"A brief statement about you. Markdown is allowed. (PUBLIC)", options:{rows:6}}
+										{type:"textarea", path:"statusMessage", label:"About Me", description:"Displayed on your profile page. Markdown is allowed. (PUBLIC)", options:{rows:4, showLimit:true}}
 										{type:"text", path:"location", label:"Location", description:"City, State, or whatever you want. (PUBLIC)"}
+										{type:"text", path:"data.tags", label:"Hashtags", description:"Enter #Hashtags separated by spaces.  (PUBLIC)"}
 									]
 								}
 								{
 									type: layout-vertical
-									label: Avatar Image
+									label: Images
 									children: [
-										{type:"upload", path:"iconUrl", description:"Displayed next to your name as an icon. (PUBLIC)", options:{accept:"image/*", delete:"/@me/delete-icon"}}
+										{type:"upload", path:"iconUrl", label:"Avatar Image", description:"Displayed next to your name as an icon. (PUBLIC)", options:{accept:"image/*", delete:"/@me/delete-icon"}}
+										{type:"upload", path:"imageUrl", label:"Banner Image", description:"Displays at the top of your profile page. (PUBLIC)", options:{accept:"image/*", delete:"/@me/delete-image"}}
+										{type:"upload", path:"data.background-body", label:"Window Background Image", description:"Displays instead of the window's background color (PUBLIC)", options:{accept:"image/*", delete:"/@me/delete-background"}}
 									]
 								}
 								{
-									type: layout-vertical
-									label: Hashtags
+									label: Colors
+									description: "Change the colors of your profile page to match your brand."
+									type:layout-vertical
 									children: [
-										{type:"textarea", path:"data.tags", label:"Tags", description:"Use #Hashtags separated by spaces.  (PUBLIC)", options:{rows:8}}
+										{type:"colorpicker", path:"data.color-body", label:"Window Background"}
+										{type:"colorpicker", path:"data.color-banner", label:"Banner Background"}
+										{type:"colorpicker", path:"data.color-menu", label:"Menu Background"}
+										{type:"colorpicker", path:"data.color-page", label:"Page Background"}
+										{type:"colorpicker", path:"data.color-button", label:"Links and Buttons"}
+									]
+								}
+								{
+									label: Style
+									type:layout-vertical
+									children: [
+										{type:"textarea", path:"data.stylesheet", label:"Custom CSS Stylesheet", description: "Experts only! &nbsp; <a href=https://bandwagon.fm/css-guide target=_blank>Read the CSS Guide &rarr;</a>", options:{rows:12, style:"font-family:monospace; font-size:14px;"}}
 									]
 								}
 								{
 									type:"layout-vertical"
-									label: Privacy & Security
+									label: Security
 									children: [
+										{type:"text", path:"username", label:"Username", description:"How others will identify you online. (PUBLIC)", options:{autocomplete:"off", validator:"/.validate/username"}}
 										{type:"text", path:"emailAddress", label:"Email Address", description:"Used to sign in and support your account. Not shared. (PRIVATE)"}
 										{type:"password", path:"new_password", label:"Change Password", description:"At least 8 characters. Please use a Password Manager. (PRIVATE)"}
 										{type:"toggle", path:"isPublic", options:{text:"Public (visible to people)"}}
 										{type:"toggle", path:"isIndexable", options:{text:"Indexable (request inclusion in search engines)"}}
+										{type:"html", description:"<div class='float-right'><span hx-get='/@me/delete' class='margin-top-xs text-red clickable'>Delete my account</span></div>"}
 									]
 								}
 
@@ -161,67 +239,125 @@
 					{do:"upload-attachments", category:"body-background", fieldname:"data.background-body", download-path:"data.background-body", rules:{types:["webp"]}}
 					{do:"process-tags", paths:["data.tags"]}
 					{do:"save"}
-					{do:"search-index", if:"{{.IsIndexable}}"}
+					{do:"set-password"}
+					{do:"search-index"}
 					{do:"refresh-page"}
 				]}
 			]
 		}
 
+		edit-status: {
+			roles: ["self"]
+			steps: [
+				{do: "as-modal", background:"view", steps:[
+					{
+						do: "edit"
+						form:{
+							label: Edit Status Message
+							type: layout-vertical
+							children: [
+								{type:"textarea", path:"statusMessage", description:"Displayed on your profile page. Markdown is allowed. (PUBLIC)", options:{rows:8, showLimit:true}}
+							]
+						}
+					}
+					{do:"save"}
+					{do:"search-index"}
+					{do:"refresh-page"}
+				]}
+			] 
+		}
+
 		edit-banner: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{do: "as-modal", background:"view", steps:[
 					{
 						do: "edit"
 						form:{
 							label: Edit Banner
+							description: Choose a color or an image to display a banner on your profile.  Leave empty and it will be hidden to visitors.
 							type:layout-vertical
 							children: [
+								{type:"colorpicker", path:"data.color-banner", label:"Background Color", description:"Displays underneath your banner image."}
 								{type:"upload", path:"imageUrl", label:"Banner Image", description:"Displays at the top of your profile page.", options:{accept:"image/*", delete:"/@me/delete-image"}}
-								{type:"upload", path:"data.background-body", label:"Window Background", description:"Displays instead of the window's background color", options:{accept:"image/*", delete:"/@me/delete-background"}}
 							]
 						}
 					}
 					{do:"upload-attachments", category:"image", fieldname:"imageUrl", attachment-path:"imageId", rules:{types:["webp"]}}
-					{do:"upload-attachments", category:"body-background", fieldname:"data.background-body", download-path:"data.background-body", rules:{types:["webp"]}}
 					{do:"save"}
 					{do:"search-index", if:"{{.IsIndexable}}"}
 					{do:"refresh-page"}
 				]}
-			]
+			] 
 		}
 
-		edit-colors: {
-			roles: ["self", "owner"]
+		edit-albums: {
+			roles: ["self"]
 			steps: [
 				{do: "as-modal", background:"view", steps:[
 					{
 						do: "edit"
 						form:{
-							label: Edit Colors
-							description: "Change the colors of your profile page to match your brand."
-							type:layout-vertical
+							type: layout-vertical
+							label: Edit Albums
 							children: [
-								{type:"colorpicker", path:"data.color-body", label:"Window Background"}
-								{type:"colorpicker", path:"data.color-menu", label:"Menu Background"}
-								{type:"colorpicker", path:"data.color-page", label:"Page Background"}
-								{type:"colorpicker", path:"data.color-button", label:"Links and Buttons"}
+								{type:"text", path:"data.label-albums", label:"Title Text", description:"Used on profile, and at top of 'Albums' page.", options:{placeholder:"Albums"}}
+								{type:"textarea", path:"data.description-albums", label:"Top of Page Text", description:"Text to show at the top of this page. Markdown is allowed.", options:{rows:8}}
 							]
 						}
 					}
-					{do:"upload-attachments", category:"icon", fieldname:"iconUrl", attachment-path:"iconId", rules:{width:400, height:400, types:["webp"]}}
-					{do:"upload-attachments", category:"image", fieldname:"imageUrl", attachment-path:"imageId", rules:{types:["webp"]}}
-					{do:"upload-attachments", category:"body-background", fieldname:"data.background-body", download-path:"data.background-body", rules:{types:["webp"]}}
-					{do:"process-tags", paths:["data.tags"]}
 					{do:"save"}
-					{do:"search-index", if:"{{.IsIndexable}}"}
 					{do:"refresh-page"}
 				]}
 			]
 		}
 
+
+		edit-events: {
+			roles: ["self"]
+			steps: [
+				{do: "as-modal", background:"view", steps:[
+					{
+						do: "edit"
+						form:{
+							label: Edit Shows
+							type: layout-vertical
+							children: [
+								{type:"text", path:"data.label-events", label:"Title Text", description:"Used on profile and at the top of 'Shows' page.", options:{placeholder:"Shows"}}
+								{type:"textarea", path:"data.description-events", label:"Top of Page Text", description:"Text to show at the top of this page. Markdown is allowed.", options:{rows:8}}
+							]
+						}
+					}
+					{do:"save"}
+					{do:"refresh-page"}
+				]}
+			]
+		}
+
+
+		edit-news: {
+			roles: ["self"]
+			steps: [
+				{do: "as-modal", background:"view", steps:[
+					{
+						do: "edit"
+						form:{
+							label: Edit News
+							type: layout-vertical
+							children: [
+								{type:"text", path:"data.label-news", label:"Title Text", description:"Used on profile and at the top of 'News' page.", options:{placeholder:"News"}}
+								{type:"textarea", path:"data.description-news", label:"Top of Page Text", description:"Text to show at the top of the 'News' section. Markdown is allowed.", options:{rows:8}}
+							]
+						}
+					}
+					{do:"save"}
+					{do:"refresh-page"}
+				]}
+			] 
+		}
+
 		edit-menu: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{do: "as-modal", background:"view", steps:[
 					{
@@ -241,7 +377,7 @@
 								}
 								{
 									type: layout-vertical
-									label: Events
+									label: Shows
 									children: [
 										{type:"toggle", path:"data.show-events", options:{text:"Display 'Shows' in Menu Bar"}}
 										{type:"text", path:"data.label-events", label:"Menu Bar Text", options:{placeholder:"Shows"}}
@@ -259,29 +395,30 @@
 								}
 								{
 									type: layout-vertical
-									label: Shop
+									label: Shop Link
 									children: [
 										{type:"label", label:"The 'Shop' link is displayed automatically when you enter the shop URL below"}
 										{type:"text", path:"data.label-shop", label:"Menu Bar Text", options:{placeholder:"Shop"}}
 										{type:"text", path:"data.shop-url", label:"Shop URL"}
 									]
 								}
+								{
+									type: layout-vertical
+									label: Colors
+									children: [
+										{type:"colorpicker", path:"data.color-menu", label:"Background Color"}
+									]
+								}
 							]
 						}
 					}
-					{do:"upload-attachments", category:"icon", fieldname:"iconUrl", attachment-path:"iconId", rules:{width:400, height:400, types:["webp"]}}
-					{do:"upload-attachments", category:"image", fieldname:"imageUrl", attachment-path:"imageId", rules:{types:["webp"]}}
-					{do:"upload-attachments", category:"body-background", fieldname:"data.background-body", download-path:"data.background-body", rules:{types:["webp"]}}
-					{do:"process-tags", paths:["data.tags"]}
 					{do:"save"}
-					{do:"search-index", if:"{{.IsIndexable}}"}
 					{do:"refresh-page"}
 				]}
 			] 
 		}
-
 		sort-featured: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{do:"sort", model:"Stream", keys:"_id", values:"rank"}
 				{do:"set-header", name:"Hx-Push-Url", value:"false"}
@@ -289,26 +426,28 @@
 		}
 
 		sort-children: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{do:"sort", model:"Stream", keys:"_id", values:"rankAlt"}
 			]
 		}
 
 		header: {
+			roles: ["anonymous"]
 			steps: [
 				{do:"view-html", file:"header"}
 			]
 		}
 
 		stylesheet: {
+			roles: ["anonymous"]
 			steps: [
 				{do:"view-css"}
 			]
 		}
 
 		wizard-1: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{
 					do:edit
@@ -318,20 +457,20 @@
 							{type:"text", path:"displayName", label:"Artist/Band Name", description:"Displayed publicly. The name you want to be known by.", options:{autocomplete:"name", required:true}}
 							{type:"text", path:"username", label:"Username", description:"Displayed publicly. How others will find you online.", options:{autocomplete:"username", required:true}}
 							{type:"text", path:"emailAddress", label:"Email Address", description:"Used to sign in, and support your account. Not shared. Not displayed publicly.", options:{autocomplete:"email", required:true}}
-							{type:"password", path:"new_password", label:"Choose Your Password", description:"At least 8 characters. Please use a Password Manager.", options:{autocomplete:"new-password", minlength:8, required:true}}
+							{type:"password", path:"new_password", label:"Choose Your Password", description:"At least 8 characters. Please use a Password Manager.", options:{autocomplete:"new-password", minLength:8, required:true}}
 						]
 					}
 					options: ["endpoint:/@{{.UserID}}/wizard-1", "submit-label:Continue >>", "cancel-button:hide"]
 				},
 				{do:"set-state", state:"WIZARD-STEP-2"}
-				{do:"set-password"}
 				{do:"save"}
+				{do:"set-password"}
 				{do:"set-header", name:"HX-Refresh", value:"true"}
 			]
 		}
 
 		wizard-2: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{
 					do:edit
@@ -339,7 +478,7 @@
 						type: layout-vertical
 						children: [
 							{type:"textarea", path:"statusMessage", label:"About You", description:"A brief description of you and your music. Markdown is okay."}
-							{type:"textarea", path:"data.tags", label:"Tags", description:"Use #Hashtags separated by spaces to describe your music."}
+							{type:"textarea", path:"data.tags", label:"Tags", description:"Enter #Hashtags separated by spaces."}
 							{type:"text", path:"location", label:"Location", description:"City, State, or Country where you are based."}
 							{type:"upload", path:"iconUrl", label:"Avatar Image", description:"Displayed publicly next to your name, often on other websites, too.", options:{accept:"image/*"}}
 							{type:"upload", path:"imageUrl", label:"Banner", description:"Displays at the top of your profile page.", options:{accept:"image/*"}}
@@ -356,7 +495,7 @@
 		}
 
 		wizard-3: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{
 					do:edit
@@ -380,7 +519,7 @@
 		}
 
 		publish: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{do:"as-modal", steps:[
 					{do:"edit", form:{
@@ -400,27 +539,48 @@
 		}
 
 		delete-icon: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{do:"delete-attachments", field:"iconId"}
 				{do:"save"}
+				{do:"search-index", if:"{{.IsIndexable}}"}
 			]
 		}
 
 		delete-image: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{do:"delete-attachments", field:"imageId"}
 				{do:"save"}
+				{do:"search-index", if:"{{.IsIndexable}}"}
 			]
 		}
 
 		delete-background: {
-			roles: ["self", "owner"]
+			roles: ["self"]
 			steps: [
 				{do:"set-data", values:{"data.background-body":""}}
 				{do:"delete-attachments", category:"body-background"}
 				{do:"save"}
+			]
+		}
+
+		checkout: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"if", condition:"{{gt 1 .ProductCount}}",
+				then:[
+					{
+						do:"forward-to"
+						url:"/.checkout?productId={{.Products.First.ProductID.Hex}}&return={{.Permalink}}"
+						method:"get"
+					}
+				],
+				else:[
+					{do:"as-modal", steps:[
+						{do:"view-html"}
+					]}
+				]}
 			]
 		}
 	}

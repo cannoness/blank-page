@@ -1,7 +1,7 @@
 {
 	templateId: bandwagon-search-albums
 	templateRole: search
-	extends: ["bandwagon-search"]
+	extends: ["bandwagon-search", "bandwagon-common"]
 	model: Stream
 	containedBy: ["top"]
 	icon: book
@@ -23,11 +23,18 @@
 	}
 
 	actions: {
-		all: {
-			steps: [{do:"view-html", file:"view-albums"}]
+		view-albums: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-html"}
+			]
 		}
-		view-albums-list: {
-			steps: [{do:"view-html"}]
+
+		feed: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-feed", search-types:["Album"]}
+			]
 		}
 	}
 }
