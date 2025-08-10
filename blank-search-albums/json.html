@@ -1,6 +1,5 @@
 {{- $host := .Host -}}
 {{- $token := .Token -}}
-{{- $syndicationSlice := array $syndication "ALL-PARTNERS" -}}
 
 {{- $streams := .Streams.Top600.ByPublishDate.Reverse -}}
 {{- $streams := $streams.Where "templateId" "blank-album" -}}
