@@ -1,0 +1,33 @@
+{
+	templateId: blank-search-users
+	templateRole: search
+	extends: ["blank-search"]
+	model: Stream
+	containedBy: ["top"]
+	icon: home
+	label: BlankPage User Search
+	description: Search Engine for Users
+	schema: {
+		type:object
+		properties: {
+			label: {type:"string"}
+			description: {type:"string"}
+			data: {
+				type:object
+				properties: {
+					searchText: {type:"string"}
+					content: {type:"string"}
+				}
+			}
+		}    
+	}
+
+	actions: {
+		feed: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-feed", search-types:["Person"]}
+			]
+		}
+	}
+}

@@ -1,8 +1,8 @@
 {
 	themeId:"blank"
-	extends:["global"]
+	extends:["default"]
 	isVisible:true
-	category: "General"
+	category: "Custom"
 	label: "Blank"
 	description: "Side-Nav designed for your Magnum Opus"
 	rank: 10

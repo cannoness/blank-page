@@ -1,13 +1,14 @@
 {
 	templateId: blank-nav-link
 	templateRole:search
-	model:stream
+	model: Stream
 	containedBy: ["top", "home", "folder"]
 	label: "Redirect"
 	description: "Back to blank"
 	icon: "forward"
-	schema: {
-		type: "object"
+
+    schema: {
+		type: object
 		properties: {
 			label: {type:"string"}
 			summary: {type:"string"}
@@ -17,52 +18,74 @@
 			}}
 		}
 	}
-	states: {}
-	roles: {}
+	states: {
+		default: {
+			label: Default
+			description: Default state for Redirects
+		}
+	}
+
+	roles: {
+		viewer:{
+			label: Viewer
+			description: Can view this redirect but cannot make changes
+		}
+		editor:{
+			label: Editor
+			description: Editors can make changes to this stream
+		}
+	}
 	actions: {
 
-		sidebar: {do:"view-html"}
+		sidebar: {
+			roles: ["viewer"]
+
+					steps: [
+						{do: "view-html"}]
+        }
 		heading: {
 			roles: ["viewer", "editor", "owner"]
-			do: "view-html"
+
+					steps: [
+						{do: "view-html"}]
 		}
 		create: {
-			roles:["owner"]
+			roles:["owner", "editor"]
 			steps:[
-				{do: "save-and-publish"}
-				{do:"save", message:"Created by {{.Author.DisplayName}}"}
-				{do:"forward-to", url:"/{{.StreamID}}/edit"}
+				{do:"save"}
+				{do:"forward-to", url:"/{{.StreamID}}"}
 			]
 		}
 		view: {
-			stateRoles: {
-				published: ["anonymous"]
-			}
-			do: "view-html"
+			roles:["viewer"]
+
+					steps: [
+						{do: "view-html"}]
 		}
 		edit: {
 			roles: ["owner"]
-			steps:[{
-				do: "as-modal"
-				background:"view"
-				steps: [
-					{
-						do: "edit"
-						label: "Edit Redirect"
-						form: {
-							type: "layout-vertical"
-							children: [
-								{type: "text", label: "Label", path: "label"}
-								{type: "text", label: "Page name of redirect", path: "data.pageTitle"}
-								{type: "text", label: "URL", path: "data.url"}
-							]
-						}
-					},
-					{do: "save", comment: "Updated Redirect"}
-                    {do: "if", condition: "{{.IsPublished}}",
+			steps:[
+				{
+					do: "as-modal"
+					background:"view"
+					steps: [
+						{
+							do: "edit"
+							label: "Edit Redirect"
+							form: {
+								type: "layout-vertical"
+								children: [
+									{type: "text", label: "Label", path: "label"}
+									{type: "text", label: "Page name of redirect", path: "data.pageTitle"}
+									{type: "text", label: "URL", path: "data.url"}
+								]
+							}
+						},
+						{do: "save", comment: "Updated Redirect"}
+						{do: "if", condition: "{{.Default}}",
                         then: [
                             {do:"search-index", text:"{{.Label}} {{.Summary}}"}
-                            {do:"save-and-publish"}
+                            {do:"save"}
                         ],
                         else: [
                             {do:"search-index", action:"delete"}
@@ -70,11 +93,12 @@
                         ]
                     }
                     {do: "refresh-page"}
-                ]
-			}]
+					]
+				}
+			]
 		}
 		delete: {
-			roles: ["owner"]
+			roles: ["author", "editor"]
 			steps: [
 				{do:"delete", title:"Delete this Item?", message:"This will permanently delete this item from your website."}
 				{do:"forward-to", url:"{{.ParentID}}/"}
@@ -82,10 +106,10 @@
 		}
 
 		sharing: {
-			roles: ["owner"]
+			roles: ["author", "editor"]
 			steps: [
 				{do:"as-modal", steps: [
-					{do: "set-simple-sharing", roles: ["viewer"], title:"Who Can See This Folder?", message: "Select who can view this folder."}
+					{do: "set-simple-sharing", role: "viewer", title:"Who Can See This Folder?", message: "Select who can view this folder."}
 					{do:"save", message: "Sharing updated by {{.Author}}"}
 				]}
 			]

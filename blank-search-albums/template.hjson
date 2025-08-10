@@ -1,0 +1,40 @@
+{
+	templateId: blank-search-albums
+	templateRole: search
+	extends: ["blank-search", "blank-common"]
+	model: Stream
+	containedBy: ["top"]
+	icon: book
+	label: BlankPage Album Search
+	description: Search Engine for Albums
+	schema: {
+		type:object
+		properties: {
+			label: {type:"string"}
+			description: {type:"string"}
+			data: {
+				type:object
+				properties: {
+					searchText: {type:"string"}
+					content: {type:"string"}
+				}
+			}
+		}    
+	}
+
+	actions: {
+		view-albums: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-html"}
+			]
+		}
+
+		feed: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-feed", search-types:["Album"]}
+			]
+		}
+	}
+}

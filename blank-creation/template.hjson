@@ -1,23 +1,39 @@
 {
 	templateId: blank-creation
-	templateRole: song
+	templateRole: creation
+	model: Stream
 	label: Creation
-	extends: ["base-intent"]
+	icon: picture
+	description: "Individual picture or slideshow to include in your gallery."
+	extends: ["base-intent", "blank-common"]
 	containedBy: ["album"]
+
+	states: {
+		published: {
+			label: Published,
+			description: This item has been published and is visible on the website
+		}
+	}
+
 	schema: {
 		type: object
 		properties: {
 			label: {type: "string", required: true}
+			iconUrl: {type:"string", format:"url"}
 			data: {
 				type: object 
 				properties: {
-					category: {type: "string"}
+					genre: {type: "string"}
 					tags: {type: "string"}
-					description: {type: "string"}
+					category: {type: "string"}
+					artist: {type: "string"}
+					summary: {type: "string"}
 					streamURL: {type: "string", format:"url"}
 					imageURL: {type: "string", format: "url"}
                     featured: {type: "boolean"}
 					filename: {type: "string"}
+					attachmentId: {type: "string"}
+					attachmentFilename: {type: "string"}
 					links: {
 						type: object
 						wildcard:{type: "string", format:"url"}
@@ -33,8 +49,9 @@
 	}
 
 	socialRole: Creation
-	searchText: "{{.Label}} {{index .Data `description`}}"
+	searchText: "{{.Label}} {{index .Data `summary`}}"
 	socialRules: [
+		{target:"type", value:"Creation"}
 		{target:"attributedTo.id", path:"attributedTo.profileUrl"},
 		{target:"attributedTo.name", path:"attributedTo.name"},
 		{target:"links", forEach:"data.links", rules:[
@@ -42,25 +59,28 @@
 			{target:"rel", value:"alternate"}
 			{target:"href", path:"value"}
 		]}
-		{target:"track.type", value:"Track"}
-		{target:"track.id", path:"url"}
-		{target:"track.name", path:"label"}
-		{target:"track.album", expression:"{{.ParentURL}}"}
-		{target:"content", path:"data.description"}
-		{target:"track.position", path:"rank"}
+		{target:"work.id", path:"url"}
+		{target:"work.name", path:"label"}
+		{target:"work.album", expression:"{{.ParentURL}}"}
+		{target:"content", path:"data.summary"}
+		{target:"work.position", path:"rank"}
 		{target:"album", expression:"{{.ParentURL}}"}
 		{target:"artist", expression:"{{.ParentURL .ParentURL}}"}
 		{target:"library", expression:"{{.ParentURL}}/pub/children"}
 	]
 
-	searchRules: [
-		{target:"fullText", expression:"{{.Label}} {{index .Data `description`}}"}
-		{target:"icon", expression:""}
-	]
+	search: {
+		type: Creation
+		iconUrl:"{{first .IconURL (join `/` .ParentID.Hex `/icon`)}}"
+		summary:""
+		text: "{{.Label}} {{.AttributedTo.Name}} {{index .Data `summary`}}"
+	}
+
+	tagPaths: ["data.tags"]
 
 	actions: {
 		create: {
-			roles: ["admin", "author"]
+			roles: ["author"]
 			steps: [
 				{do:"as-modal", steps:[
 					{
@@ -110,25 +130,29 @@
 									type: layout-vertical
 									label: Description
 									children: [
-										{type: "textarea", path: "data.description", description:"Enter description to display on a creation's detail page", options:{rows: 16}}
+										{type: "textarea", path: "data.summary", description:"Enter description to display on a creation's detail page", options:{rows: 16}}
 									]
 								}
 							]
 						}
 					}
 				]}
-				{do:"save-and-publish"}
+				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
+				{do:"upload-attachments", action:"replace", category:"Creation", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"audio/*", maximum:1}
+				{do:"process-tags", paths:"data.tags"}
+				{do:"save-and-publish", outbox:false}
 				{do:"search-index"}
-				{do:"forward-to", url:"/{{.StreamID}}"}
+				{do:"refresh-page"}
 			]
 		}
 		view: {
+			roles: ["anonymous"]
 			steps: [
 				{do:"view-html"}
 			]
 		}
 		edit: {
-			roles: ["admin", "author"]
+			roles: ["author"]
 			steps: [
 				{
 					do:"as-modal",
@@ -151,11 +175,20 @@
 										]
 									}
 									{
+									type: layout-vertical
+									label: Description
+									children: [
+										{type: "textarea", path: "data.summary", description:"Enter summary to display on a creation's detail page", options:{rows: 16}}
+									    ]
+								    }
+									{
 										type: layout-vertical
 										label: Metadata
 										children: [
                                             {type: "text", path: "data.category", label: "Category"},
                                             {type: "text", path: "data.tags", label: "Tags"},
+                                            {type: "text", path: "data.dateCreated", label: "DateCreated"},
+                                            {type: "hidden", path: "data.favs", label: "Favs"}
 										]
 									}
 									{
@@ -173,18 +206,14 @@
                                             {type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
 										]
 									}
-									{
-									type: layout-vertical
-									label: Description
-									children: [
-										{type: "textarea", path: "data.description", description:"Enter description to display on a creation's detail page", options:{rows: 16}}
-									]
-								    }
 								]
 							}
 						}
 					]
 				}
+				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
+				{do:"upload-attachments", action:"replace", category:"Creation", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"audio/*", maximum:1}
+				{do:"process-tags", paths:"data.tags"}
 				{do:"save-and-publish"}
 				{do:"search-index"}
 				{do:"refresh-page"}
@@ -192,14 +221,22 @@
 		}
 
 		delete: {
-			roles: ["admin", "author"]
+			roles: ["author"]
 			steps: [
 				{do:"delete", title:"Delete this Creation?"}
 				{do:"refresh-page"}
 			]
 		}
-
+		delete-icon: {
+			roles: ["author"]
+			steps: [
+				{do: "delete-attachments"}
+				{do: "set-data", values:{"iconUrl": ""}}
+				{do: "save"}
+			]
+		}
 		prev: {
+			roles: ["anonymous"]
 			steps:[
 				{do:"with-prev-sibling", steps:[
 					{do:"redirect-to", url:"/{{.StreamID}}"}
@@ -208,6 +245,7 @@
 		}
 
 		next: {
+			roles: ["anonymous"]
 			steps:[
 				{do:"with-next-sibling", steps:[
 					{do:"redirect-to", url:"/{{.StreamID}}"}

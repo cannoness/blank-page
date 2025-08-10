@@ -1,0 +1,39 @@
+{
+	templateId: blank-search-works
+	templateRole: search
+	extends: ["blank-search"]
+	model: Stream
+	containedBy: ["top"]
+	icon: book
+	label: BlankPage work Search
+	description: Search Engine for works
+	schema: {
+		type:object
+		properties: {
+			label: {type:"string"}
+			description: {type:"string"}
+			data: {
+				type:object
+				properties: {
+					searchText: {type:"string"}
+					content: {type:"string"}
+				}
+			}
+		}    
+	}
+
+	actions: {
+		
+		view-albums-list: {
+			roles: ["anonymous"]
+			steps: [{do:"view-html"}]
+		}
+
+		feed: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-feed", search-types:["Audio"]}
+			]
+		}
+	}
+}

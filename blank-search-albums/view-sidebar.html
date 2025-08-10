@@ -1,0 +1,22 @@
+{{- $licenses := .Dataset "blank-search-albums.licenses" -}}
+{{- $tags := .QueryParam "tags" -}}
+
+{{- $query := .QueryParam "q" -}}
+{{- $escapedQuery := queryEscape $query -}}
+
+<div class="flex-row md:flex-column">
+	<a href="/artists?q={{$query}}" hx-boost="true" class="search-navigation turboclick">Artists</a>
+	<a href="/albums" hx-boost="true" class="search-navigation turboclick selected">Albums</a>
+	<a href="/works?q={{$query}}" hx-boost="true" class="search-navigation turboclick">works</a>
+	<a href="/events?q={{$query}}" hx-boost="true" class="search-navigation turboclick">Calendar</a>
+	<a href="/news/?q={{$query}}" hx-boost="true" class="search-navigation turboclick">News</a>
+</div>
+
+<hr>
+
+<div class="text-xs">
+	<label for="licenses" class="text-gray">LICENSE</label>
+	<select id="licenses" name="tags" form="search-form" script='install select(value:"{{$tags}}", prefix:"LIC:", options:{{$licenses | json}}) on change send submit to #search-form'>
+		<option value="">(All)</option>
+	</select>
+</div>

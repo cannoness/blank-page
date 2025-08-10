@@ -14,18 +14,14 @@
 		type:object
 		properties: {
 			label: {type:"string", required: true}
-			description: {type:"string", format:"html", maxLength:2048}
+			summary: {type:"string", format:"html", maxLength:2048}
 			iconUrl: {type:"string", format:"url"}
-			syndication: {type:"array", items:{type:"string"}}
 			data: {
 				type:object
 				properties: {
 					checkoutLabel: {type:"string", maxLength:255}
-					license: {type:"string"}
 					imageFilename: {type:"string", maxLength:255}
 					tags: {type:"string"}
-					category: {type:"string"}
-                    iconUrl: {type:"string", format:"uri"}
 					links: {type:"object", wildcard: {type:"string", format:"uri"}}
 					color: {type:"object", properties: {
 						body: {type:"string", format:"color"},
@@ -74,7 +70,7 @@
 		{target:"artists", append:{type:"Artist"}}
 		{target:"artists.0.id", path:"attributedTo.profileUrl"}
 		{target:"artists.0.name", path:"attributedTo.name"}
-		{target:"tracks", expression:"{{.URL}}/pub/children"}
+		{target:"works", expression:"{{.URL}}/pub/children"}
 	]
 
 	tagPaths: ["data.tags"]
@@ -83,6 +79,7 @@
 		type: "Album"
 		iconUrl:""
 		description:""
+		text: "{{.Label}} {{.AttributedTo.Name}}"
 		text: "{{.Label}} {{.Summary}} {{index .Data `tags`}}"
     }
 
@@ -103,7 +100,7 @@
 									label: General
 									children: [
 										{type:"text", path:"label", label:"Album Name"}
-										{type:"upload", path:"iconUrl", label:"Album Art", options:{accept:"image/*", filename:"data.imageFilename", rules:{width:800, height:800}}}
+										{type:"upload", path:"iconUrl", label:"Album Art", options:{accept:"image/*", filename:"data.imageFilename", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
 										{type:"toggle", path:"isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured"}}
 									]
 								}
@@ -213,13 +210,6 @@
 										{type:"colorpicker", path:"data.color.button", label:"Links and Buttons"}
 									]
 								}
-								{
-									type:"layout-vertical"
-									label:"Distribution"
-									children:[
-										{type:"multiselect", path:"syndication", label:"Distribute to these streaming services", description:"These services will be notified when this album is published.", options:{provider:"syndication-targets"}}
-									]
-								}
 							]
 						}
 					}
@@ -272,28 +262,31 @@
 					do: add-stream
 					style: inline
 					location: child
-					title: + Add a Creation Link
+					title: + Add a Creation
 					type:blank-creation
 					with-data:{
-						"data.artist":"{{.AttributedTo.Name}}""data.tags":"{{.Data `tags`}}"
+						"data.artist":"{{.AttributedTo.Name}}"
+						"data.tags":"{{.Data `tags`}}"
+						"data.category": "{{.Data `category`}}"
 					}
 				}
 			//	{do:"set-header", name:"Hx-Retarget", value:"main"}
 			//	{do:"set-header", name:"Hx-Reswap", value:"innerHTML"}
 			//	{do:"set-header", name:"Hx-Push-Url", value:"false"}
-				{do:"add-event", event:"songAdded"}
+				{do:"add-event", event:"creationAdded"}
 				{do:"remove-event", event:"refreshPage"}
 			//	{do:"view-html", method:"post", file:"view"}
 			]
 		}
 
-		sort-tracks: {
+		sort-works: {
 			roles: ["author"]
 			steps: [
 				{do:"sort", model:"Stream", keys:"_id", values:"rank"}
 				{do:"refresh-page"}
 			]
 		}
+
 
 		stylesheet: {
 			roles:["anonymous"]
@@ -338,7 +331,7 @@
 								label:"Edit Attachment",
 								children:[
 									{type:"text", path:"label", label:"Label"}
-									{type:"textarea", path:"description", label:"Summary"}
+									{type:"textarea", path:"description", label:"Description"}
 								]
 							}
 						}
@@ -371,10 +364,8 @@
 								label: Re-Publish this Album?
 								description: "If you've made changes to this album, you can send updates to all distribution channels.",
 								children:[
-									{type:"select", path:"data.license", label:"License", options:{required:true, provider:"bandwagon-album.licenses"}}
-									{type:"select", path:"isFeatured", label:"Feature on Home Page", options:{enum:[{value:"false", label:"NO. Do not show on my home page"}, {value:"true", label:"YES. Show on my home page"}]}}
-									{type:"multiselect", path:"syndication", label:"Distribute to Streaming Stations", description:"Share this album with indie streaming services", options:{provider:"syndication-targets"}}
-								]
+								     {type:"select", path:"isFeatured", label:"Feature on Home Page", options:{enum:[{value:"false", label:"NO. Do not show on my home page"}, {value:"true", label:"YES. Show on my home page"}]}}
+									]
 							},
 							options:["submit-label:Publish Album"]
 						}
@@ -386,9 +377,7 @@
 								type: layout-vertical
 								label: Publish this Album?
 								children:[
-									{type:"select", path:"data.license", label:"License", options:{required:true, provider:"bandwagon-album.licenses"}}
-									{type:"select", path:"isFeatured", label:"Feature on Home Page", options:{enum:[{value:"false", label:"NO. Do not show on my home page"}, {value:"true", label:"YES. Show on my home page"}]}}
-									{type:"multiselect", path:"syndication", label:"Distribute to Streaming Stations", description:"Share this album with indie streaming services.", options:{provider:"syndication-targets"}}
+								{type:"select", path:"isFeatured", label:"Feature on Home Page", options:{enum:[{value:"false", label:"NO. Do not show on my home page"}, {value:"true", label:"YES. Show on my home page"}]}}
 								]
 							},
 							options:["submit-label:Publish Album"]
@@ -402,19 +391,15 @@
 						// metadata for album attachments
 						[],
 						
-						// metadata for song attachments
+						// metadata for creation attachments
 						[
-							{target:"cover", path:"parent.iconUrl"},
-							{target:"comment", path:"parent.attributedTo.profileUrl"}
-							{target:"title", path:"stream.label"},
-							{target:"author", path:"parent.attributedTo.name"}
-							{target:"artist", path:"parent.attributedTo.name"}
-							{target:"album_artist", path:"parent.attributedTo.name"},
-							{target:"album", path:"parent.label"},
-							{target:"track", path:"stream.rank"},
-
-							{target:"category", path:"stream.data.category"}
-							{target:"description", path:"stream.data.description"},
+                            {target:"comment", path:"parent.attributedTo.profileUrl"}
+                            {target:"title", path:"stream.label"},
+                            {target:"artist", path:"parent.attributedTo.name"}
+                            {target:"album", path:"parent.label"},
+                            {target:"work", path:"stream.rank"},
+                            {target:"genre", path:"stream.data.genre"}
+							{target:"summary", path:"stream.data.summary"},
 						]
 					]}
 					{do:"refresh-page"}
@@ -525,18 +510,14 @@
 					// metadata for album attachments
 					[],
 					
-					// metadata for song attachments
+					// metadata for creation attachments
 					[
-						{target:"cover", path:"parent.iconUrl"},
 						{target:"comment", path:"parent.attributedTo.profileUrl"}
 						{target:"title", path:"stream.label"},
-						{target:"author", path:"parent.attributedTo.name"}
-						{target:"artist", path:"parent.attributedTo.name"}
-						{target:"album_artist", path:"parent.attributedTo.name"},
+						{target:"artist", path:"parent.attributedTo.name"},
 						{target:"album", path:"parent.label"},
-						{target:"track", path:"stream.rank"},
 						{target:"category", path:"stream.data.category"}
-						{target:"description", path:"stream.data.description"}
+						{target:"summary", path:"stream.data.summary"}
 					]
 				]}
 			]
