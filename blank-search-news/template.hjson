@@ -19,7 +19,7 @@
 		type:object
 		properties: {
 			label: {type:"string"}
-			description: {type:"string"}
+			summary: {type:"string"}
 			data: {
 				type:object
 				properties: {

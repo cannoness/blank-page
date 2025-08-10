@@ -64,16 +64,8 @@ color: {{$buttonColor.Text}};">&#9658; Play on BlankPage</a>
                     {{- end -}}
 
                     <div style="margin-bottom:16px; opacity:0.6;">
-                        {{- $license := $album.DataString "license"}}
-                        {{- if eq "COPYRIGHT" $license -}}
                             &copy;
                             Copyright.  All Rights Reserved.
-                        {{- else if ne "" $license -}}
-                            {{- $licenses := .Dataset "album-collection.licenses" -}}
-                            {{- $licenseInfo := $licenses.Value $license -}}
-                                {{icon $licenseInfo.Icon}} 
-                                {{$licenseInfo.Label}}
-                        {{- end -}}
                     </div>
                 </td>
             </tr>

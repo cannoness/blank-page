@@ -10,7 +10,7 @@
 		type:object
 		properties: {
 			title: {type:"string"}
-			description: {type:"string"}
+			summary: {type:"string"}
 			content: {type:"object", properties:{
 				"type": {type:"string"}
 				"raw": {type:"string"}

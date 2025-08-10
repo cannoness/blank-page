@@ -11,7 +11,7 @@
 		properties: {
 			iconId: {type:"string", format:"objectId"}
 			label: {type:"string", maxLength:100, required: true}
-			description: {type:"string", maxLength:100}
+			summary: {type:"string", maxLength:100}
 			themeId: {type:"string", maxLength: 100}
 		}
 	}

@@ -31,7 +31,7 @@
 		type:object
 		properties: {
 			label: {type:"string", required:true}
-			description: {type:"string"}
+			summary: {type:"string"}
 			iconUrl: {type:"string", format:"url"}
 			startDate: {type:"object", properties: {
 				date: {type:"string", format:"date"}

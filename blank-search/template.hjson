@@ -11,7 +11,7 @@
 		properties: {
 			icon: {type:"string"}
 			label: {type:"string"}
-			description: {type:"string"}
+			summary: {type:"string"}
 			data: {
 				type:object
 				properties: {
