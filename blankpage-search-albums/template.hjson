@@ -1,0 +1,40 @@
+{
+	templateId: blankpage-search-exhibits
+	templateRole: search
+	extends: ["blankpage-search", "blankpage-common"]
+	model: Stream
+	containedBy: ["top"]
+	icon: book
+	label: OneBlankPage Exhibit Search
+	description: Search Engine for Exhibits
+	schema: {
+		type:object
+		properties: {
+			label: {type:"string"}
+			summary: {type:"string"}
+			data: {
+				type:object
+				properties: {
+					searchText: {type:"string"}
+					content: {type:"string"}
+				}
+			}
+		}    
+	}
+
+	actions: {
+		view-exhibits: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-html"}
+			]
+		}
+
+		feed: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-feed", search-types:["Exhibit"]}
+			]
+		}
+	}
+}

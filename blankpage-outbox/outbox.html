@@ -1,0 +1,389 @@
+{{- $isMyself := .IsMyself -}}
+{{- $username := .Username -}}
+
+{{- if eq .StateID "LIVE" -}}
+
+	{{- $circleCount := .Circles.Featured.Count -}}
+	{{- $isPublic := .IsPublic -}}
+
+	{{- $exhibits := .Outbox.Featured.Where "templateId" "blankpage-exhibit" -}}
+	{{- $exhibits := $exhibits.By "data.releaseDate" -}}
+	{{- $exhibits := $exhibits.Reverse.Slice -}}
+
+	<!-- Page content -->
+	<div class="framed page h-card padding-none"
+		script="{{- if .IsMyself -}}
+			on load take .selected from .nav-item for #nav-outbox
+		{{- else -}}
+			on load remove .selected from .nav-item
+		{{- end -}}">
+
+		<title>{{.DisplayName}}</title>
+		<link rel="icon" href="{{.IconURL}}"/>
+
+		<!-- oEmbed: https://oembed.com -->
+		<link rel="alternate" type="application/json+oembed" href="{{.OEmbedJSON}}">
+		<link rel="alternate" type="text/xml+oembed" href="{{.OEmbedXML}}">
+
+		<!-- ActivityPub links -->
+		<link rel="http://webfinger.net/rel/profile-page" href="{{.ProfileURL}}"/>
+		<link rel="http://ostatus.org/schema/1.0/subscribe" href="{{.Host}}/.ostatus/tunnel?uri={uri}">
+		<link rel="self" type="application/activity+json" href="{{.ActivityPubURL}}"/>
+
+		<!-- RSS and WebSub Links -->
+		<link rel="hub" href="{{.Host}}/@{{.UserID}}/websub"/>
+		<link rel="alternate" type="application/rss+xml" href="{{.Host}}/@{{.UserID}}/feed?format=rss"/>
+		<link rel="alternate" type="application/atom+xml" href="{{.Host}}/@{{.UserID}}/feed?format=atom"/>
+		<link rel="alternate" type="application/feed+json" href="{{.Host}}/@{{.UserID}}/feed?format=json"/>
+		<link rel="canonical" class="u-url" href="{{.ProfileURL}}">
+
+		<!-- Open Graph: https://ogp.me -->
+		<meta property="og:type" content="profile">
+		<meta property="og:title" content="{{.DisplayName}}">
+		<meta property="og:description" content="{{.StatusMessage}}">
+		<meta property="og:url" content="{{.Permalink}}">
+		<meta property="og:image" content="{{.IconURL}}">
+		<meta property="profile:username" content="{{.Username}}">
+
+		{{- if not .IsPublic -}}
+			{{- if $exhibits.NotEmpty -}}
+				<div hx-get="/@{{.UserID}}/publish" class="clickable alert-green margin-none" role="button">
+					{{icon "check-circle"}}
+					Your profile IS READY TO PUBLISH on the social web.
+					<span class="text-underline">Click here to publish it now</span>
+				</div>
+			{{- end -}}
+		{{- end -}}
+
+		{{- template "header" . -}}
+
+		<div class="pos-relative">
+
+			<!-- Band Name -->
+			<div class="padding md:flex-row flex-align-center margin-top">
+				<div class="md:flex-align-self-start margin-horizontal-auto align-center">
+					<img id="profile-icon" src="{{.IconURL}}" class="circle width-60% sm:width:40% md:width-96" aria-hidden="true">
+				</div>
+				<div class="flex-grow">
+					<h1 id="profile-name" class="margin-none align-center md:align-left">{{.DisplayName}}</h1>
+
+					<div class="margin-vertical sm:margin-none align-center md:align-left">
+						<span id="profile-username" class="text-gray margin-right-sm margin-bottom-sm nowrap" script="install selectText">@{{.Username}}@{{.Hostname}}</span>
+						{{- if ne "" .Location }}
+							<span id="profile-location" class="text-gray nowrap"> {{icon "location"}} {{.Location}}</span>
+						{{- end -}}
+					</div>
+
+					<div id="profile-links" class="margin-vertical pos-relative align-center md:align-left">
+						{{- range  $index, $link := .Links }}
+							{{if gt $index 0}}<span aria-hidden="true">&middot;</span>{{end}}
+							<a href="{{$link.ProfileURL}}" rel="me" target="_blank">{{$link.Name}}</a>
+						{{- end -}}
+
+						{{- if ne "" (.Data "label-shop") -}}
+							<a href="{{.Data `shop-url`}}" rel="me" target="_blank">{{first (.Data "label-shop") "Shop"}}</a>
+						{{- end -}}
+					</div>
+				</div>
+				<div class="margin-top-lg md:margin-none align-center md:align-left">
+
+					<div class="nowrap" script="on load trigger storage on window">
+						<div class="margin-none">
+
+							<button hx-get="/@{{.UserID}}/intent?intent=follow&object={{.Permalink}}" class="primary">{{icon "fediverse"}} Follow for Updates</button>
+
+							{{- if gt $circleCount 0 -}}
+								<button hx-get="/@{{.UserID}}/checkout" class="outline margin-left-sm">
+									{{icon "star"}}
+									Subscribe
+								</button>
+							{{- end -}}
+
+						</div>
+						<div class="margin-top-sm text-xs text-light-gray">
+							<span hx-get="/@{{.UserID}}/intent" class="clickable intentMarker-account">&nbsp;</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="padding">
+
+				<!-- Exhibits -->
+				{{- if or $exhibits.NotEmpty $isMyself -}}
+
+					{{- $exhibitLabel := first (.Data "label-exhibits") "Exhibits" -}}
+
+					<div class="margin-bottom pos-relative">
+						<a href="/@{{$username}}/exhibits" hx-boost="true" aria-label="View All Exhibits">
+							<span class="text-nocolor text-plain text-xl bold margin-right-sm">{{$exhibitLabel}}</span>
+							All &rarr;
+						</a>
+
+						{{- if $isMyself -}}
+							<div class="pos-absolute-top-right text-sm">
+								<button hx-get="/@{{.UserID}}/add-exhibit?isFeatured=true" aria-label="Add an Exhibit">
+									{{icon "add"}} Exhibit
+								</button>
+								<button hx-get="/@{{.UserID}}/edit-exhibits" aria-label="Edit Exhibit Page">
+									Edit
+								</button>
+							</div>
+						{{- end -}}
+
+					</div>
+					<hr class="margin-none">
+
+					{{- if $exhibits.IsEmpty -}}
+						<div class="text-gray text-sm margin-bottom">
+							Get started by uploading music to your blankpage profile.  Featured exhibits appear here.
+						</div>
+					{{- end -}}
+
+					<div class="cols-2-4 padding-vertical margin-bottom-xl">
+						{{- range $exhibits -}}
+
+							{{- if or .IsPublished $isMyself -}}
+
+								<div class="rounded card hover-trigger hover-swell">
+									<a href="/{{.StreamID}}" hx-boost="true" hx-swap="transition:true" class="text-plain text-nocolor flex-column block">
+
+										<img src="{{.IconURL}}" class="rounded-top square width-100% block object-fit-cover" aria-hidden="true">
+										<div class="padding text-plain">
+											<div class="bold link">{{.Label}}</div>
+											<div class="text-gray">
+												Exhibit
+												{{- $releaseDate := index .Data "releaseDate" -}}
+												{{- if ne nil $releaseDate }}
+													&middot; {{$releaseDate | year }}
+												{{- end -}}
+											</div>
+										</div>
+										{{- if not .IsPublished -}}
+											<div class="pos-absolute-four-corners bg-stripes flex-center"></div>
+										{{- end -}}
+									</a>
+
+									{{- if $isMyself -}}
+										<button hx-get="/{{.StreamID}}/edit" class="hover-show pos-absolute-top-right text-xs">Edit</button>
+									{{- end -}}
+
+								</div>
+							{{- end -}}
+						{{- end -}}
+
+						{{- if $exhibits.IsEmpty -}}
+							<div hx-get="/@{{.UserID}}/add-exhibit?isFeatured=true" class="hover-swell rounded card flex-column flex-center padding-vertical padding-horizontal" role="button">
+								<div class="align-center margin-none link" style="font-size:64px;" aria-hidden="true">{{icon "cassette"}}</div>
+								<div class="align-center margin-none margin-top bold link">Next Step:</div>
+								<div class="align-center text-lg margin-none margin-bottom bold link">Add an Exhibit</div>
+								<div class="align-center text-sm text-gray">You can publish your profile after you've uploaded at least one exhibit</div>
+							</div>
+						{{- end -}}
+					</div>
+				{{- end -}}
+
+				<!-- Events -->
+				{{- $events := .Outbox.Featured.Where "templateId" "blankpage-event" -}}
+				{{- $events := $events.WhereGT "startDate" yesterday -}}
+				{{- $events := $events.ByStartDate.Slice -}}
+
+				{{- if or $events.NotEmpty $isMyself -}}
+
+					{{- $eventLabel := first (.Data "label-events") "Shows" -}}
+
+					<div class="margin-top-lg margin-bottom pos-relative">
+						<a href="/@{{$username}}/events" hx-boost="true" aria-label="View All Shows">
+							<span class="text-nocolor text-plain text-xl bold margin-right-sm">{{$eventLabel}}</span>
+							All &rarr;
+						</a>
+
+						{{- if $isMyself -}}
+							<div class="pos-absolute-top-right text-sm">
+								<button hx-get="/@{{.UserID}}/add-event" aria-label="Add a Show">{{icon "add"}} Show</button>
+								<button hx-get="/@{{.UserID}}/edit-events" aria-label="Edit Shows">Edit</button>
+							</div>
+						{{- end -}}
+
+					</div>
+
+					<div class="table margin-bottom-xl">
+						{{- range $index, $event := $events -}}
+							<div class="hover-trigger pos-relative clickable">
+								<a href="{{$event.URL}}" target="_blank" class="block text-plain text-nocolor sm:flex-row pos-relative hover-trigger turboclick">
+
+									<div class="hide md:show width-128 margin-right margin-top-sm">
+										<div class="align-center">
+											<div class="text-uppercase" style="font-size:12px; line-height:100%; color:var(--gray60);">{{$event.StartDate | shortMonth}}</div>
+											<div class="text-lg bold">{{$event.StartDate | day}}</div>
+										</div>
+									</div>
+
+									<div class="flex-column">
+										<div class="text-lg bold margin-none">{{$event.Label}}</div>
+										<div class="flex-grow text-gray">
+											{{$event.StartDate | shortDate}}
+											{{- $time := $event.StartDate | shortTime -}}
+											{{- if ne "12:00 AM" $time -}}
+												&nbsp;{{- $time -}}
+											{{- end -}}
+											<br>
+											{{$event.Places.First.Name}}<br>
+										</div>
+										<div class="hide sm:show">
+											<span class="bold link">More Info &rarr;</span>
+										</div>
+									</div>
+
+									{{- if not .IsPublished -}}
+										<div class="pos-absolute-four-corners bg-stripes flex-center"></div>
+									{{- end -}}
+								</a>
+
+								{{- if $isMyself -}}
+									<button hx-get="/{{.StreamID}}/edit" class="hover-show pos-absolute-top-right text-xs">Edit</button>
+								{{- end -}}
+
+							</div>
+						{{- end -}}
+
+					</div>
+
+					{{- if $events.IsEmpty -}}
+						<div class="text-gray text-sm">
+							Publish showtimes, locations, and ticketing websites on your event calendar.  Featured events appear here.
+						</div>
+					{{- end -}}
+
+				{{- end -}}
+
+				<!-- News -->
+				{{- $news := .Outbox.Featured.Where "templateId" "blankpage-news" -}}
+				{{- $news := $news.ByPublishDate.Reverse.Slice -}}
+
+				{{- if or $news.NotEmpty $isMyself -}}
+
+					{{- $newsLabel := first (.Data "label-news") "News" -}}
+
+					<div class="margin-top-lg margin-bottom pos-relative">
+
+						<a href="/@{{$username}}/news" hx-boost="true" aria-label="View All News">
+							<span class="text-nocolor text-plain text-xl bold margin-right">{{$newsLabel}}</span>
+							All &rarr;
+						</a>
+
+						{{- if $isMyself -}}
+							<div class="pos-absolute-top-right text-sm">
+								<button hx-get="/@{{.UserID}}/add-news" aria-label="Add a News Item">{{icon "add"}} News</button>
+								<button hx-get="/@{{.UserID}}/edit-news" aria-label="Edit News">Edit</button>
+							</div>
+						{{- end -}}
+
+					</div>
+
+					<div class="table margin-bottom-xl">
+						{{- range $news -}}
+							{{- if or .IsPublished $isMyself -}}
+
+								<div class="pos-relative hover-trigger clickable flex-column">
+									<a href="/{{.StreamID}}" hx-boost="true" class="text-plain text-nocolor sm:flex-row width-100%">
+
+										{{- if eq "" .IconURL -}}
+											<div class="hide sm:show rounded square width:100% sm:width-128 margin-right" style="background-color:var(--gray20);"></div>
+										{{- else -}}
+											<img src="{{.IconURL}}" class="rounded square width-100% sm:width-128 object-fit-cover margin-right" aria-hidden="true">
+										{{- end -}}
+
+										<div>
+											<div class="text-lg bold margin-none padding-none ellipsis-block" style="max-height:3em;">{{.Label}}</div>
+											<div class="padding-bottom text-gray">{{.PublishDate | shortDate }}</div>
+											<div class="text-gray width-512">{{.Summary}}</div>
+											<div class="bold link">{{first .Data.linkText "Read More"}} &rarr;</div>
+										</div>
+
+										{{- if not .IsPublished -}}
+											<div class="pos-absolute-four-corners bg-stripes flex-center"></div>
+										{{- end -}}
+									</a>
+
+									{{- if $isMyself -}}
+										<button hx-get="/{{.StreamID}}/edit" class="hover-show pos-absolute-top-right text-xs">Edit</button>
+									{{- end -}}
+
+								</div>
+							{{- end -}}
+						{{- end -}}
+					</div>
+
+				{{- end -}}
+
+				{{- if and $isMyself $news.IsEmpty -}}
+					<div class="text-gray text-sm">
+						Publish updates to your followers.  Featured items appear here.
+					</div>
+				{{- end -}}
+			</div>
+
+			<div class="margin-top-xl padding md:flex-row" style="background-color:rgba(0,0,0,0.08);">
+
+				<div class="md:width-60% lg:width-50% hover-trigger pos-relative">
+					<div class="flex-row flex-align-center">
+						<h3>About {{.DisplayName}}</h3>
+						{{ if $isMyself -}}
+							<button hx-get="/@{{.UserID}}/edit-status" class="text-xs hover-show">Edit</button>
+						{{- end -}}
+					</div>
+					<div id="profile-status" class="margin-vertical text-gray">{{.StatusMessage | markdown}}</div>
+
+				</div>
+
+				<div class="md:width-10% lg:width-20%"></div>
+
+				<div id="profile-tags" class="md:width:30%">
+					{{- if .Tags.NotEmpty -}}
+						<h3>Hashtags</h3>
+						{{- range .Tags -}}
+							<a href="/hubbers?q=%23{{.Name}}" role="link" class="tag">#{{.Name}}</a>
+						{{- end -}}
+					{{- end -}}
+				</div>
+
+			</div>
+
+			{{- if $isMyself -}}
+				<div id="outbox-refresh-{{.UserID}}" hx-preserve>
+
+					<div
+						hx-get="/@{{.UserID}}"
+						hx-trigger="refreshPage from:window"
+						hx-target="#main"
+						hx-swap="innerHTML"
+						hx-push-url="false">
+					</div>
+
+					<div hx-ext="sse" sse-connect="/@{{.UserID}}/sse">
+						<div
+							hx-get="/@{{.UserID}}"
+							hx-trigger="sse:{{.UserID}}"
+							hx-target="#main"
+							hx-swap="innerHTML"
+							hx-push-url="false">
+						</div>
+					</div>
+
+				</div>
+			{{- end -}}
+
+		</div>
+
+	</div>
+
+{{- else if not $isMyself -}}
+	{{- template "coming-soon" . -}}
+{{- else if eq .StateID "WIZARD-STEP-3" -}}
+	{{- template "wizard-3" . -}}
+{{- else if eq .StateID "WIZARD-STEP-2" -}}
+	{{- template "wizard-2" . -}}
+{{- else  -}}
+	{{- template "wizard-1" . -}}
+{{- end -}}

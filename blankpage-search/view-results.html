@@ -1,0 +1,25 @@
+{{- $queryString := .QueryParam "q" -}}
+{{- $token := .Token -}}
+
+{{- $results := .Search.Slice -}}
+
+    <div class="text-md">
+        <button hx-get="/{{.Token}}/intent?intent=follow&object={{.Permalink}}">Follow for Updates</button>
+        <button hx-get="/{{.Token}}/intent">{{icon "more-horizontal"}}</button>
+    </div>
+    <hr>
+    <div class="cols-4">
+        {{- range $result := $results -}}
+            <div class="card" style="overflow-x:hidden;">
+                <a href={{ $result.url }} ><img src={{ $result.iconUrl }} alt="">
+                    <span class="title">{{ $result.title }}</span>
+                    <span class="text">
+                        Favorites: {{ $result.favorites }}<br/>
+                        Date Created: {{ $result.dateCreated }}<br/>
+                        Tags: {{ $result.tags }}<br/>
+                        Category: {{- $result.category -}}<br/>
+                    </span>
+                </a>
+            </div>
+        {{- end -}}
+    </div>

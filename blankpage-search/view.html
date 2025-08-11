@@ -1,0 +1,30 @@
+<div id="search" class="fullscreen padding-none" script="on load take .selected from .nav-item for #nav-{{.NavigationID}}">
+
+	<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/{{.Token}}/feed?{{.QueryString}}">
+    <h1>Newest Additions</h1>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <div class="row">
+        <div class="clearfix col-md-8"></div>
+        <div class="clearfix col-md-4 right align-content-end">
+            <div class="input-group">
+                <input id="keywords" type="text" class="form-control" placeholder="Search for..." />
+                    <button class="btn btn-default" type="button" onclick="keywordSearch()">
+                    <i class="fa-solid fa-magnifying-glass"></i> Go!</button>
+            </div>
+        </div>
+    </div>
+
+    {{- template "view-widget" . -}}
+
+    <div class="container-all">
+        <!-- Category Search -->
+        <div class="cols-2-4 padding-vertical margin-bottom-xl">
+
+			<div id="search-results">
+				{{template "view-results" .}}
+			</div>
+
+        </div>
+    </div>
+</div>

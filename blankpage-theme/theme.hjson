@@ -1,0 +1,37 @@
+{
+	themeId: "blankpage"
+	extends:["default"]
+	isVisible:true
+	category:"Custom"
+	label: "Blank Page"
+	description: "Customized Theme for OneBlankPage"
+	rank: 100
+	schema: {
+		type: "object",
+		properties: {
+			iconId: {type:"string", format:"objectId"}
+			iconUrl: {type:"string", format:"url"}
+			label: {type:"string", maxLength:100, required: true}
+			description: {type:"string", maxLength:100}
+			themeId: {type:"string", maxLength: 100}
+			registrationId: {type:"string", maxLength: 100}
+		}
+	}
+	form: {
+		type: layout-vertical
+		children: [
+			{type: "text", label: "Website Name", path: "label", description: "Title of this website and domain."}
+			{type: "upload", label: "Logo Image", path: "iconUrl", description: "Image to display on signin pages and emails. Roughly 16:9 works best.", options:{accept:"image/*"}}
+			{type: "textarea", label: "Description", path: "description", options:{rows:5}}
+		]
+	}
+	defaultFolders: [
+		{label:"Friends"}
+		{label:"Family"}
+		{label:"Creations"}
+		{label:"Music"}
+		{label:"Literature"}
+		{label:"Podcasts"}
+		{label:"Videos"}
+	]
+}

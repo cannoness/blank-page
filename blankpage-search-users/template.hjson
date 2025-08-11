@@ -1,0 +1,33 @@
+{
+	templateId: blankpage-search-users
+	templateRole: search
+	extends: ["blankpage-search"]
+	model: Stream
+	containedBy: ["top"]
+	icon: home
+	label: OneBlankPage User Search
+	description: Search Engine for Users
+	schema: {
+		type:object
+		properties: {
+			label: {type:"string"}
+			summary: {type:"string"}
+			data: {
+				type:object
+				properties: {
+					searchText: {type:"string"}
+					content: {type:"string"}
+				}
+			}
+		}    
+	}
+
+	actions: {
+		feed: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-feed", search-types:["Person"]}
+			]
+		}
+	}
+}

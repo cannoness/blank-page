@@ -1,0 +1,314 @@
+{{- $streamID := .StreamID -}}
+{{- $tags := .Tags -}}
+{{- $creations := .Children.Top60.Slice -}}
+{{- $canEdit := .UserCan "edit" -}}
+{{- $isPlayable := false -}}
+{{- $links := .Data "links" -}}
+{{- range $index, $creation := $creations -}}
+	{{- if ne nil $creation.Data.imageURL -}}
+		{{- $isPlayable = true -}}
+	{{- end -}}
+{{- end -}}
+{{- $checkoutLabel := first (.Data "checkout label") "Buy Now" -}}
+
+<div id="exhibit-{{.StreamID}}"  class="page padding-none">
+
+	<link rel="stylesheet" type="text/css" href="/{{.StreamID}}/stylesheet?v={{.ETag}}"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<meta property="og:title" content="{{.Label}}">
+	<meta property="og:url" content="{{.Permalink}}">
+	<meta property="og:image" content="{{.IconURL}}">
+	<meta property="og:description" content="{{.Summary}}">
+	<meta property="og:site_name" content="{{.DomainLabel}}">
+	<meta property="creation:creator" content="{{.AttributedTo.ProfileURL}}">
+
+	<div class="padding	pos-absolute-top-left margin-top-lg">
+	  <output id="output">
+		  <p class=".text-info"> DEBUG AREA: Stay calm! This area exists on purpose! -- </p>
+	  </output>
+	</div>
+
+	{{- if not .IsPublished -}}
+		{{- if $creations.NotEmpty -}}
+		<div class="clickable alert-green margin-none" hx-get="/{{.StreamID}}/publish" role="button" style="border-radius:0px;">
+			{{icon "check-circle"}}
+
+			This exhibit IS READY TO PUBLISH on the social web.
+			<span class="text-underline">Click here to publish it now</span>
+		</div>
+		{{- end -}}
+	{{- end -}}
+
+	<div class="padding	">
+
+		{{- if $canEdit -}}
+			<div class="pos-absolute-top-right text-sm">
+
+				<button hx-get="/{{.StreamID}}/edit">Edit Exhibit</button>
+				<button hx-get="/{{.StreamID}}/edit-checkout">
+					{{- if .StreamHasPrivileges -}}
+						{{icon "check"}} Sales Enabled
+					{{- else -}}
+						Sell Online
+					{{- end -}}
+				</button>
+				{{- if .IsPublished -}}
+					<button hx-get="/{{.StreamID}}/unpublish">{{icon "check"}} Published</button>
+				{{- else if $creations.NotEmpty -}}
+					<button hx-get="/{{.StreamID}}/publish" class="primary">Publish</button>
+				{{- end -}}
+
+			</div>
+		{{- end -}}
+
+		<!-- First Row: Exhibit Name and Artwork -->
+		<div class="md:flex-row margin-bottom margin-top-lg">
+			<div class="md:width-1-6 flex-shrink-0">
+				{{- if ne "" .IconURL -}}
+					<img src="{{.IconURL}}" class="width-100% aspect-square" aria-hidden="true" style="object-fit:cover;">
+				{{- else if $canEdit -}}
+					<div class="aspect-square text-center flex-column flex-justify-center flex-align-center" style="border:solid 1px var(--black)" script="install blockselect()">
+						<a hx-get="/{{.StreamID}}/edit" class="text-plain">Click here to add exhibit art</a>
+					</div>
+				{{- end -}}
+
+				{{- if not .IsPublished -}}
+					<div class="pos-absolute-four-corners bg-stripes flex-center">
+					</div>
+				{{- end -}}
+
+				{{- if ne "" .Summary -}}
+					<article class="margin-bottom-lg">
+						<h3>Exhibit Notes</h3>
+						{{.Summary | markdown}}
+					</article>
+				{{- end -}}
+			</div>
+
+			{{- if .IsPublished -}}
+
+				<div class="margin-vertical"></div>
+				<div class="text-sm">
+					<button hx-get="/{{.StreamID}}/intent?intent=create&content={{.Label | queryEscape}} {{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "share"}}</span> Share</button>
+					<button hx-get="/{{.StreamID}}/intent?intent=like&object={{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "thumbs-up"}}</span> Like</button>
+					<button hx-get="/{{.StreamID}}/intent" aria-label="Manage Accounts">{{icon "more-horizontal"}}</button>
+				</div>
+			{{- end -}}
+
+			<div class="md:width-8"></div>
+			<div class="flex-grow-0">
+				<h1 class="margin-top-none">{{.Label}}</h1>
+				<div class="text-sm margin-top-none">
+					<div class="pos-absolute-top-left text-sm">
+						<a hx-get="/@{{.ParentID}}" href="/@{{.ParentID}}" class="turboclick" aria-label="Hubber: {{.AttributedTo.Name}}">
+							{{.AttributedTo.Name}}
+						</a>
+					</div>
+				</div>
+
+				<div class="margin-vertical"></div>
+
+				{{- if $creations.NotEmpty -}}
+					<div class="margin-vertical-lg">
+						<button class="primary" hx-get="/{{.StreamID}}/add-creation"><td><span aria-hidden="true">{{icon "plus"}}</span> Add the first creation to this exhibit</button>
+
+						<a href="/{{.Token}}/edit">Upload Photos</a>
+
+						{{- if .UserCan "properties" -}}
+							<a hx-get="/{{.Token}}/properties">Edit Info</a>
+						{{- end -}}
+
+						{{- if .UserCan "sharing" -}}
+							<a hx-get="/{{.Token}}/sharing">Sharing</a>
+						{{- end -}}
+
+						<div class="right">
+						{{- if .UserCan "delete" -}}
+							<a hx-get="/{{.Token}}/delete" class="text-red">Delete</a>
+						{{- end -}}
+						</div>
+					</div>
+				{{- else if $canEdit -}}
+
+					<div class="table margin-vertical-lg">
+						<div hx-get="/{{.StreamID}}/add-creation" role="button" class="clickable flex-row">
+							<div class="margin-horizontal-xs flex-align-self-center link" style="font-size:50px" aria-hidden="true">{{icon "plus"}}</div>
+							<div class="flex-grow">
+								<div class="text-lg bold link nowrap">
+									Add the first creation to this exhibit
+								</div>
+								<div class="text-sm text-gray">You'll need to add at least one creation to this exhibit before you can publish it.</div>
+							</div>
+						</div>
+					</div>
+				{{- end -}}
+
+			</div>
+		</div>
+
+		<!-- Second Row: -->
+		<div class="md:flex-row-reverse">
+			<!-- Image Cards -->
+
+			<div id="container-all" class="container-all">
+				{{ template "children" . }}
+			</div>
+
+			{{- if $tags.NotEmpty -}}
+				<div class="md:width-8 flex-shrink-1 flex-grow-0"></div>
+				<div class="md:width-128 flex-shrink-1">
+					<div class="text-sm">
+						{{- range $index, $tag := $tags -}}
+							{{- if eq "Hashtag" $tag.Type}}
+								<a href="/exhibits?q=%23{{$tag.Name}}" class="tag margin-bottom-sm">#{{$tag.Name}}</a>
+							{{- end -}}
+						{{- end -}}
+					</div>
+				</div>
+			{{- end -}}
+
+			{{- if $links.NotEmpty -}}
+<!--				<div class="margin-bottom-lg">-->
+<!--					<h3>Source Links</h3>-->
+<!--					{{- range $key, $value := $links -}}-->
+
+<!--						{{- $icon := "music-note-beamed" -}}-->
+<!--						{{- if ne "" $value -}}-->
+<!--							{{- $label := $value -}}-->
+
+<!--							{{- else if eq "SOUNDCLOUD" $key -}}-->
+<!--								{{- $label = "SoundCloud" -}}-->
+<!--								{{- $icon = "cloud" -}}-->
+
+<!--							{{- else if eq "YOUTUBE" $key -}}-->
+<!--								{{- $label = "YouTube Music" -}}-->
+<!--								{{- $icon = "youtube" -}}-->
+
+<!--							{{- else -}}-->
+<!--								{{- $label = domainOnly $value -}}-->
+
+<!--							{{- end -}}-->
+
+<!--							<a href="{{$value}}" class="block ellipsis" target="_blank">-->
+<!--								<i class="bi bi-{{$icon}}"></i> {{ $label }}-->
+<!--							</a>-->
+<!--						{{- end -}}-->
+
+<!--					{{- end -}}-->
+<!--					</div>-->
+			{{- end -}}
+
+			{{- $uploads := .AttachmentsByCategory "other" -}}
+			{{- if or $uploads.NotEmpty $canEdit -}}
+				<div id="exhibit-attachments" class="margin-bottom-lg">
+					<div class="flex-row">
+						<h3 class="flex-grow margin-none">Other Files</h3>
+					</div>
+
+					{{- if $canEdit -}}
+						<div class="margin-bottom-sm">
+							<div class="text-gray">Attachments like <b class="nowrap">liner notes</b> or <b class="nowrap">exhibit art</b> that anyone can access.</div>
+							<span hx-get="/{{$streamID}}/upload" class="link" role="button" aria-label="Attach a File">{{icon "upload"}} Attach a File</span>
+						</div>
+					{{- end -}}
+
+					{{- if $uploads.NotEmpty -}}
+						<div class="table margin-top-lg">
+							{{- range $index, $upload := $uploads -}}
+								<div class="flex-row padding-vertical-sm">
+									<div class="flex-grow">
+										<a href="/{{$streamID}}/attachments/{{.AttachmentID.Hex}}" target="_blank" class="ellipsis">{{.Label}}</a><br>
+										<span class="text-sm text-gray">{{.Description}}</span>
+									</div>
+									{{- if $canEdit -}}
+										<div>
+											<button hx-get="/{{$streamID}}/edit-upload?attachmentId={{.AttachmentID.Hex}}" title="Edit Attachment" aria-label="Edit Attachment" class="text-xs margin-left-sm">{{icon "more-horizontal"}}</button>
+										</div>
+									{{- end -}}
+								</div>
+							{{- end -}}
+						</div>
+					{{- end -}}
+				</div>
+			{{- end -}}
+
+		</div>
+
+		{{- if $canEdit -}}
+		<div id="stream-refresh-{{.StreamID}}" hx-preserve>
+
+			<div
+				hx-get="/{{.StreamID}}"
+				hx-trigger="refreshPage from:window"
+				hx-push-url="false"
+				hx-target="#main"
+				hx-swap="innerHTML">
+			</div>
+
+			<div
+				hx-get="/{{.StreamID}}"
+				hx-trigger="creationAdded from:window delay:300ms"
+				hx-push-url="false"
+				hx-target="#main"
+				hx-swap="innerHTML">
+			</div>
+
+			<div
+				hx-get="/{{.StreamID}}"
+				hx-trigger="creationAdded from:window delay:600ms"
+				hx-push-url="false"
+				hx-target="#main"
+				hx-swap="innerHTML">
+			</div>
+
+			<div
+				hx-get="/{{.StreamID}}"
+				hx-trigger="creationAdded from:window delay:900ms"
+				hx-push-url="false"
+				hx-target="#main"
+				hx-swap="innerHTML">
+			</div>
+
+			<!--
+			<div
+				hx-get="/{{.StreamID}}"
+				hx-trigger="refreshPage from:window delay:1000ms"
+				hx-push-url="false"
+				hx-target="#main"
+				hx-swap="innerHTML">
+			</div>
+			-->
+
+			<!--
+			<div hx-ext="sse" sse-connect="/{{.StreamID}}/sse">
+				<div
+					hx-get="/{{.StreamID}}"
+					hx-target="main"
+					hx-swap="innerHTML"
+					hx-trigger="sse:{{.StreamID}}"
+					hx-push-url="false">
+				</div>
+			</div>
+			-->
+
+		</div>
+		{{- end -}}
+
+		<nav class="pos-absolute-bottom navbar navbar-expand-sm fixed-bottom">
+
+			<div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
+				<ul class="pagination pagination-sm" id="pagination">
+
+				</ul>
+			</div>
+			<div class="pos-absolute-bottom text-sm ">
+				<button hx-get="/{{.StreamID}}/intent?intent=create&content={{.Label}} {{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "share"}}</span> Share</button>
+				<button hx-get="/{{.StreamID}}/intent?intent=like&object={{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "thumbs-up"}}</span> Like</button>
+				<button hx-get="/{{.StreamID}}/intent" aria-label="Manage Accounts">{{icon "more-horizontal"}}</button>
+			</div>
+		</nav>
+
+
+	</div>
+</div>

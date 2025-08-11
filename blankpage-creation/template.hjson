@@ -1,0 +1,262 @@
+{
+	templateId: blankpage-creation
+	templateRole: creation
+	model: Stream
+	label: Creation
+	extends: ["base-intent", "blankpage-common"]
+	containedBy: ["exhibit"]
+
+	states: {
+		published: {
+			label: Published
+			description: "This item has been published and is visible on the website"
+		}
+	}
+
+	schema: {
+		type: object
+		properties: {
+			label: {type: "string", required: true}
+			thumbUrl: {type:"string", format:"url"}
+			data: {
+				type: object
+				properties: {
+					tags: {type:"string"}
+					category: {type: "string"}
+					genre: {type: "string"}
+					hubber: {type: "string"}
+					license: {type: "string"}
+					title: {type: "string"}
+					summary: {type: "string"}
+					imageUrl: {type: "string", format:"url"}
+					dateCreated: {type: "string" }
+					featured: {type: "boolean"}
+					mature: {type: "boolean"}
+					favorites: {type: "string"}
+					attachmentId: {type: "string"}
+					attachmentFilename: {type: "string"}
+					links: {
+						type: object
+						wildcard:{type: "string", format:"url"}
+					}
+				}
+			}
+		}
+	}
+
+	socialRole: Artwork
+	socialRules: [
+		{target:"type", value:"Artwork"}
+		{target:"attributedTo.id", path:"attributedTo.profileUrl"}
+		{target:"attributedTo.name", path:"attributedTo.name"}
+		{target:"links", forEach:"data.links", rules:[
+			{target:"label", path:"key"}
+			{target:"rel", value:"alternate"}
+			{target:"href", path:"value"}
+		]}
+		{target:"work.type", value:"work"}
+		{target:"work.id", path:"url"}
+		{target:"work.name", path:"label"}
+		{target:"work.exhibit", expression:"{{.ParentURL}}"}
+		{target:"work.position", path:"rank"}
+		{target:"content", path:"data.summary"}
+		{target:"exhibit", expression:"{{.ParentURL}}"}
+		{target:"library", expression:"{{.ParentURL}}/pub/children"}
+	],
+
+	search: {
+		type: Artwork
+		thumbUrl:"{{first .IconURL (join `/` .ParentID.Hex `/icon`)}}"
+		summary:""
+		text: "{{.Label}} {{.AttributedTo.Name}} {{index .Data `summary`}}"
+		tags: "LIC:{{index .Data `license`}}"
+	}
+
+	tagPaths: ["data.tags"]
+
+	actions: {
+		create: {
+			roles: ["author"]
+			steps: [
+				{do:"as-modal", steps:[
+					{
+						do:"edit"
+						form:{
+							type: layout-tabs
+							label: "+ Add a Creation"
+							children: [
+								{
+									type: layout-vertical
+									label: General
+									children: [
+										{type: "text",   path: "label", label: "Creation Title"}
+										{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*"}}
+										{type: "upload", path: "thumbUrl", label:"Cover Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
+										{type: "text",   path: "data.length", label: "Length"}
+										{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
+									]
+								}
+								{
+									type: layout-vertical
+									label: Description
+									children: [
+										{type: "textarea", path: "data.summary", description:"Enter summary or creation description.  Displays on this creation's detail page.", options:{rows: 16}}
+										{type: "toggle", path: "data.explicit", options:{true-text:"Mature Content", false-text:"Mature Content"}}
+									]
+								}
+								{
+									type: layout-vertical
+									label: Metadata
+									children: [
+										{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}}
+										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."}
+										{type: "text", path: "data.genre", label: "Genre"}
+										{type: "text", path: "data.hubber", label: "Hubber"}
+										{type: "text", path: "data.category", label: "Category"}
+										{type: "text", path: "data.favorites", label: "Favorites"}
+									]
+								}
+								{
+									type: layout-vertical
+									label: Links
+									children: [
+                                        {type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
+										{type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
+										{type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
+										{type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
+										{type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
+										{type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
+										{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
+									]
+								}
+							]
+						}
+					}
+				]}
+				{do:"upload-attachments", category:"image", fieldname:"thumbUrl", download-path:"thumbUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
+				{do:"upload-attachments", action:"replace", category:"Artwork", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"image/*", maximum:1}
+				{do:"process-tags", paths:"data.tags"}
+				{do:"save-and-publish", outbox:false}
+				{do:"search-index"}
+				{do:"refresh-page"}
+			]
+		}
+		view: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-html"}
+			]
+		}
+
+		edit: {
+			roles: ["author"]
+			steps: [
+				{
+					do:"as-modal"
+					steps:[
+						{
+							do:"edit",
+							options: ["delete:/{{.StreamID}}/delete"],
+							form:{
+								type: layout-tabs
+								label: "Edit Creation"
+								children: [
+									{
+										type: layout-vertical
+										label: General
+										children: [
+											{type: "text",   path: "label", label: "Creation Title"}
+											{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*"}}
+											{type: "upload", path: "thumbUrl", label:"Preview Thumbnail", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
+											{type: "text",   path: "data.length", label: "Length"}
+											{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
+										]
+									}
+									{
+										type: layout-vertical
+										label: Description
+										children: [
+											{type: "textarea", path: "data.summary", description:"Enter summary or creation description.  Displays on this creation's detail page.", options:{rows: 16}}
+											{type: "toggle", path: "data.explicit", options:{true-text:"Mature Content", false-text:"Mature Content"}}
+										]
+									}
+									{
+										type: layout-vertical
+										label: Metadata
+										children: [
+											{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}}
+											{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."}
+											{type: "text", path: "data.genre", label: "Genre"}
+											{type: "text", path: "data.hubber", label: "Hubber"}
+											{type: "text", path: "data.category", label: "Category"}
+											{type: "text", path: "data.favorites", label: "Favorites"}
+										]
+									}
+									{
+										type: layout-vertical
+										label: Links
+										children: [
+											{type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
+											{type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
+											{type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
+											{type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
+											{type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
+											{type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
+											{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+				{do:"upload-attachments", category:"image", fieldname:"thumbUrl", download-path:"thumbUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
+				{do:"upload-attachments", action:"replace", category:"Artwork", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"image/*", maximum:1}
+				{do:"process-tags", paths:"data.tags"}
+				{do:"save-and-publish"}
+				{do:"search-index"}
+				{do:"refresh-page"}
+			]
+		}
+
+		delete: {
+			roles: ["author"],
+			steps: [
+				{do:"delete", title:"Delete this Creation?"}
+				{do:"refresh-page"}
+			]
+		}
+
+		delete-icon: {
+			roles: ["author"],
+			steps: [
+				{do: "delete-attachments"}
+				{do: "set-data", values:{"thumbUrl": ""}}
+				{do: "save"}
+			]
+		}
+		prev: {
+			roles: ["anonymous"],
+			steps:[
+				{do:"with-prev-sibling", steps:[
+					{do:"redirect-to", url:"/{{.StreamID}}"}
+				]}
+			]
+		}
+
+		next: {
+			roles: ["anonymous"],
+			steps:[
+				{do:"with-next-sibling", steps:[
+					{do:"redirect-to", url:"/{{.StreamID}}"}
+				]}
+			]
+		}
+
+		artwork: {
+			steps:[
+				{do:"view-attachment", category:"Artwork", format:["webp", "jpeg", "gif"], width:800, height:800}
+			]
+		}
+	}
+}
