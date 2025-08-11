@@ -90,9 +90,8 @@
 									label: General
 									children: [
 										{type: "text",   path: "label", label: "Creation Title"}
-										{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*"}}
+										{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
 										{type: "upload", path: "thumbUrl", label:"Cover Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
-										{type: "text",   path: "data.length", label: "Length"}
 										{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
 									]
 								}
@@ -101,7 +100,7 @@
 									label: Description
 									children: [
 										{type: "textarea", path: "data.summary", description:"Enter summary or creation description.  Displays on this creation's detail page.", options:{rows: 16}}
-										{type: "toggle", path: "data.explicit", options:{true-text:"Mature Content", false-text:"Mature Content"}}
+										{type: "toggle", path: "data.mature", options:{true-text:"Mature Content", false-text:"Mature Content"}}
 									]
 								}
 								{
@@ -133,7 +132,7 @@
 						}
 					}
 				]}
-				{do:"upload-attachments", category:"image", fieldname:"thumbUrl", download-path:"thumbUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
+				{do:"upload-attachments", category:"Artwork", fieldname:"thumbUrl", download-path:"thumbUrl" accept-type:"image/*", maximum:1, rules:{width:800, height:800}}
 				{do:"upload-attachments", action:"replace", category:"Artwork", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"image/*", maximum:1}
 				{do:"process-tags", paths:"data.tags"}
 				{do:"save-and-publish", outbox:false}
@@ -168,7 +167,6 @@
 											{type: "text",   path: "label", label: "Creation Title"}
 											{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*"}}
 											{type: "upload", path: "thumbUrl", label:"Preview Thumbnail", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
-											{type: "text",   path: "data.length", label: "Length"}
 											{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
 										]
 									}
@@ -177,7 +175,7 @@
 										label: Description
 										children: [
 											{type: "textarea", path: "data.summary", description:"Enter summary or creation description.  Displays on this creation's detail page.", options:{rows: 16}}
-											{type: "toggle", path: "data.explicit", options:{true-text:"Mature Content", false-text:"Mature Content"}}
+											{type: "toggle", path: "data.mature", options:{true-text:"Mature Content", false-text:"Mature Content"}}
 										]
 									}
 									{
@@ -255,7 +253,7 @@
 
 		artwork: {
 			steps:[
-				{do:"view-attachment", category:"Artwork", format:["webp", "jpeg", "gif"], width:800, height:800}
+				{do:"view-attachment", category:"Artwork", format:["webp", "jpeg", "gif", "jpg", "png"], width:800, height:800}
 			]
 		}
 	}
