@@ -35,11 +35,6 @@
 	<div class="pos-relative padding">
 
 		<div class="md:flex-row">
-
-			<div class="md:width-256 flex-shrink-0">
-				<img id="work-icon" src="{{$iconURL}}" class="width-100% rounded square" aria-hidden="true" style="view-transition-name:icon-{{$exhibit.StreamID}}; object-fit:cover;">
-			</div>
-
 			<div class="md:width-32"></div>
 			<div class="flex-grow-1">
 				<h1 class="margin-vertical-none">
@@ -79,35 +74,16 @@
 					</span>
 				</div>
 
-				<div class="margin-vertical"></div>
-				<div class="margin-vertical-lg">
 
-					<div id="media-controls" class="margin-vertical-lg">
-						<a href="/{{.StreamID}}/prev" hx-boost="true" class="button" aria-label="Previous Track">{{icon "skip-backward-fill"}} Prev</a>
-						{{ if ne nil $attachmentID }}
-							<button hx-on:click="PlayFirst()" class="primary playing-hide" aria-label="Play Track">{{icon "play-fill"}} Play</button>
-							<button hx-on:click="Pause()" class="primary playing-show" aria-label="Pause Track">{{icon "pause-fill"}} Pause</button>
-							<script src="/.templates/blankpage-exhibit/javascript" preload></script>
-							<script type="application/javascript">
-								var playlist = [
-									{"url":"/{{$.StreamID}}/attachments/{{$attachmentID}}", "title":"{{.Label}}"}
-								]
-							</script>
-							<audio>
-								<source id="source-ogg" type="audio/ogg">
-								<source id="source-mp3" type="audio/mp3">
-							</audio>
-						{{ else }}
-							<button disabled aria-label="Play Track">{{icon "play-fill"}} Play</button>
-						{{ end }}
-						<a href="/{{.StreamID}}/next" hx-boost="true" class="button" aria-label="Next Track">Next {{icon "skip-forward-fill"}}</a>
-					</div>
+				<div class="md:flex-row">
+
+					<img class="padding flex-grow-1" id="piece-icon" src="{{imageUrl}}" aria-hidden="true" >
 
 					<div class="text-sm">
 						<button hx-get="/{{.StreamID}}/intent?intent=create&content={{.Label | queryEscape}} {{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "share"}}</span> Share</button>
 						<button hx-get="/{{.StreamID}}/intent?intent=like&object={{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "thumbs-up"}}</span> Like</button>
 					</div>
-		
+
 				</div>
 
 			</div>
@@ -206,7 +182,7 @@
 					<span id="work-hubber">Artist: {{.Data "hubber"}}</span><br>
 				{{- end -}}
 			
-				{{- $license := .DataString "license"}}
+				{{- $license := .DataString "license"}}l
 				{{- if eq "COPYRIGHT" $license -}}
 					<div id="work-license">
 						<h3 class="margin-top">License</h3>
@@ -242,7 +218,7 @@
 
 		{{- if .UserCan "edit" -}}
 			<div class="pos-absolute-top-right text-xs">
-				<button hx-get="/{{.StreamID}}/edit">Edit Song</button>
+				<button hx-get="/{{.StreamID}}/edit">Edit Piece</button>
 			</div>
 
 			<div hx-ext="sse" sse-connect="/{{.StreamID}}/sse">

@@ -1,30 +1,33 @@
-{{- $results := .Children.Top60.Slice -}}
-{{- $canEdit := .UserCan "edit" -}}
-{{- $isowner := .IsOwner -}}
+<!--{{- $results := .Children.Top60.Slice -}}-->
+<!--{{- $canEdit := .UserCan "edit" -}}-->
+<!--{{- $isowner := .IsOwner -}}-->
+<!--{{- if $results.NotEmpty -}}-->
+
+
+{{- $results := .Children.Top6.Slice -}}
 {{- if not $results.IsEmpty -}}
 
+	<style>{{- template "stylesheet" . -}}</style>
 <!--        <script src="/.templates/blank-exhibit/javascript"  type="text/javascript" ></script>-->
 <!--            <span id="content">No creations found. <br/>-->
 <!--                <button onclick="linkDiscord()" hx-target="body" hx-swap="outerHTML">Link Discord ID</button>-->
 <!--            </span>-->
 
-	{{- range $index, $result := $results -}}
+<!--	{{- range $index, $result := $results -}}-->
 		<div class="container">
-			<a href={{$result.Data.linksTo}}>
-				<img src={{$result.Data.imageURL}} alt="">
-				<span class="title"> {{$result.Label}} </span>
-				<span class="text">
-					Favorites: {{$result.Data.favorites}}<br/>
-					Date Created: {{$result.Data.dateCreated}}<br/>
-					Tags: {{$result.Data.tags}}<br/>
-					Category: {{$result.Data.category}}<br/>
-				</span>
-			</a>
-			<button hx-get='/modals/deleteLink.html'
-					hx-trigger='confirmed'
-					onClick="confirmRemoval({{$result.StreamID}})" class="remove" aria-label="remove">
-			</button>
-		</div>
+<!--				<img src="{{.IconUrl}}" alt="">-->
+<!--				<span class="title"> {{$result.Label}} </span>-->
+<!--				<span class="text">-->
+<!--					Favorites: {{ $result.Data.favorites }}<br/>-->
+<!--					Date Created: {{ $result.Data.dateCreated }}<br/>-->
+<!--					Tags: {{ $result.Data.tags }}<br/>-->
+<!--					Category: {{ $result.Data.category }}<br/>-->
+<!--				</span>-->
+<!--			<button hx-get='/modals/deleteLink.html'-->
+<!--					hx-trigger='confirmed'-->
+<!--					onClick="confirmRemoval({{$result.StreamID}})" class="remove" aria-label="remove">-->
+<!--			</button>-->
+<!--		</div>-->
 <!--		<div streamId="{{.StreamID}}" class="item">-->
 <!--			<div-->
 <!--				hx-get="/{{.Token}}"-->
@@ -34,6 +37,31 @@
 <!--				<img src="{{.ImageURL}}?height=300&amp;width=300" class="width-100%">-->
 <!--			</div>-->
 <!--		</div>-->
+
+<!--	{{- end -}}-->
+	{{- range $index, $result := $results -}}
+		<div streamId="{{.StreamID}}" class="item">
+			<div
+				hx-get="/{{.Token}}"
+				hx-push-url="true"
+				class="clickable card"
+				>
+			{{- if ne "" .IconURL -}}
+				<img src="{{.IconURL}}" class="width-50% rounded square">
+				{{- end -}}
+			</div>
+		</div>
+
+	{{- end -}}
+
+	{{- if $results.IsLength 6 -}}
+
+		<div
+			hx-get="/{{.Token}}/children?publishDate=lt:{{$results.Last.PublishDate}}"
+			hx-push-url="false"
+			hx-trigger="revealed"
+			hx-target="#children"
+			hx-swap="beforeend"></div>
 
 	{{- end -}}
 

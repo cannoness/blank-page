@@ -240,7 +240,7 @@
 
 		image: {
 			steps:[
-				{do:"view-attachment", category:"image", format:["webp", "jpeg", "gif"], width:800, height:800}
+				{do:"view-attachment", category:"image", format:["webp", "jpeg", "jpg", "gif"], width:800, height:800}
 			]
 		}
 
@@ -350,6 +350,13 @@
 				{do:"view-css"}
 			]
 		}
+
+		children: {
+			roles: ["anonymous"]
+			steps: [
+				{do:"view-html", file:"children"}
+			]
+		},
 
 		upload: {
 			roles: ["author"]

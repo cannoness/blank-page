@@ -72,7 +72,7 @@
 
 		<div hx-get="/{{.StreamID}}/edit" role="button" class="md:width-50% lg:width-40% md:margin-right-lg flex-grow-0 flex-shrink-0 margin-bottom-lg rounded pos-relative">
 			{{- if ne "" .IconURL -}}
-				<img id="exhibit-icon" src="{{.IconURL}}" class="width-100% rounded square" aria-hidden="true" style="view-transition-name: icon-{{.StreamID}}; object-fit:cover;">
+				<img id="exhibit-icon" src="{{.IconURL}}" class="width-40% rounded square" aria-hidden="true" style="view-transition-name: icon-{{.StreamID}}; object-fit:cover;">
 			{{- else if $canEdit -}}
 				<div class="rounded width-100% square text-center flex-column flex-justify-center flex-align-center text-gray" style="border:solid 1px var(--black)" script="install blockselect()">
 					Click here to add exhibit art
@@ -107,7 +107,7 @@
 							<button hx-get="/{{$streamID}}/checkout" class="outline">
 								<span class="htmx-request-hide">{{icon "star"}}</span>
 								<span class="htmx-request-show"><span class="spin">{{icon "loading"}}</span></span>
-								{{$checkoutLabel}}
+								{{ $checkoutLabel }}
 							</button>
 						{{- end -}}
 					{{- end -}}
@@ -119,52 +119,46 @@
 					<button hx-get="/{{.StreamID}}/intent?intent=like&object={{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "thumbs-up"}}</span> Like</button>
 					<button hx-get="/{{.StreamID}}/intent" aria-label="Manage Accounts">{{icon "more-horizontal"}}</button>
 				</div>
+
 			{{- end -}}
 
-			<!-- Song List -->
-			{{- if $creations.NotEmpty -}}
-			
-				<form hx-post="/{{.StreamID}}/sort-works" hx-trigger="end" hx-push-url="false">
-					<div id="exhibit-works" class="table margin-top-lg">
-						{{ template children . }}
-					</div>
-				</form>
-
-				{{- end -}}
-
-						{{- if $canEdit -}}
-							<div hx-get="/{{.StreamID}}/add-creation" role="button" class="link flex-row">
-								<div></div>
-								<div aria-hidden="true">
-									{{icon "add"}}
-								</div>
-								<div colspan="5">
-									Add Another Song
-								</div>
-							</div>
-						{{- end -}}
-
-					</div>
-				</form>
-
-			{{- else if $canEdit -}}
-
-				<div class="table margin-vertical-lg">
-					<div hx-get="/{{.StreamID}}/add-creation" role="button" class="clickable flex-row">
-						<div class="margin-horizontal-xs flex-align-self-center link" style="font-size:50px" aria-hidden="true">{{icon "music"}}</div>
-						<div class="flex-grow">
-							<div class="text-lg bold link nowrap">
-								Add the first creation to this exhibit
-							</div>
-							<div class="text-sm text-gray">You'll need to add at least one creation to this exhibit before you can publish it.</div>
-						</div>
-					</div>
-				</div>
-			{{- end -}}
-					
-		</div>
+		</form>
 
 	</div>
+	<!-- Piece List -->
+	{{- if $creations.NotEmpty -}}
+	<div class="container-all">
+		{{- template "children" . -}}
+
+		{{- if $canEdit -}}
+			<div hx-get="/{{.StreamID}}/add-creation" role="button" class="link flex-row">
+			<div class="margin-horizontal-xs flex-align-self-center link" style="font-size:50px" aria-hidden="true">{{icon "plus"}}</div>
+			<div class="flex-grow">
+				<div class="text-lg bold link nowrap">
+					Add Another Creation
+				</div>
+			</div>
+			</div>
+		{{- end -}}
+
+	</div>
+
+	{{- else if $canEdit -}}
+			<div hx-get="/{{.StreamID}}/add-creation" role="button" class="clickable flex-row">
+				<div class="margin-horizontal-xs flex-align-self-center link" style="font-size:50px" aria-hidden="true">{{icon "art"}}</div>
+				<div class="flex-grow">
+					<div class="text-lg bold link nowrap">
+						Add the first creation to this exhibit
+					</div>
+					<div class="text-sm text-gray">You'll need to add at least one creation to this exhibit before you can publish it.</div>
+				</div>
+			</div>
+	</div>
+	{{- end -}}
+
+
+
+
 
 	<div class="md:flex-row padding" style="background-color:rgba(0,0,0,0.08);">
 
@@ -193,7 +187,7 @@
 			{{- end -}}
 
 			{{- if $links.NotEmpty -}}
-				<div id="exhibit-links" class="margin-bottom-lg">
+				<div id="children" class="margin-bottom-lg">
 					<h3>Also On These Sites:</h3>
 					{{- range $key, $value := $links -}}
 						
@@ -318,19 +312,17 @@
 
 		{{- if $creations.NotEmpty -}}
 			<script src="/.templates/blankpage-exhibit/javascript" preload></script>
-			<script id="playlist" type="application/javascript" data-json='[
-				{{- $first := true -}}
-				{{- range $index, $creation := $creations -}}
-					{{- if ne nil $creation.Data.attachmentId -}}
-						{{- if not $first -}},{{- end -}}
-						{{- $first = false -}}
-						{"url":"/{{$creation.StreamID}}/attachments/{{$creation.Data.attachmentId}}", "title":{{$creation.Label | json}} }
-					{{ end -}}
-				{{- end -}}
-				]'>
-				var playlist = JSON.parse(document.getElementById('playlist').dataset.json);
-			</script>
-
+<!--				<script id="playlist" type="application/javascript" data-json='[-->
+<!--					{{- $first := true -}}-->
+<!--					{{- range $index, $creation := $creations -}}-->
+<!--						{{- if ne nil $creation.Data.attachmentId -}}-->
+<!--							{{- if not $first -}},{{- end -}}-->
+<!--							{{- $first = false -}}-->
+<!--							{"url":"/{{$creation.StreamID}}/attachments/{{$creation.Data.attachmentId}}", "title":{{$creation.Label | json}} }-->
+<!--						{{ end -}}-->
+<!--					{{- end -}}-->
+<!--					]'>-->
+<!--					var playlist = JSON.parse(document.getElementById('playlist').dataset.json);-->
 			{{- if $canEdit -}}
 
 				<script src="/.themes/global/resources/sortable-1.15.0/Sortable.min.js" preload></script>
