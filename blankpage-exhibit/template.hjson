@@ -18,13 +18,13 @@
 				properties: {
 					checkoutLabel: {type:"string", maxLength:255}
 					license: {type:"string"}
-					imageFilename: {type:"string", maxLength:255}
+					thumbFilename: {type:"string", maxLength:255}
 					tags: {type:"string"}
 					releaseDate:{type:"string", format:"date"}
 					links: {type:"object", wildcard: {type:"string", format:"uri"}}
 					color: {type:"object", properties: {
-						body: {type:"string", format:"color"},
-						page: {type:"string", format:"color"}, 
+						body: {type:"string", format:"color"}
+						page: {type:"string", format:"color"}
 						button: {type:"string", format:"color"}
 					}}
 				}
@@ -103,7 +103,7 @@
 										{type:"text", path:"label", label:"Exhibit Name"}
 										{type:"select", path:"data.license", label:"License", options:{required:true, provider:"blankpage-exhibit.licenses"}}
 										{type:"date", path:"data.releaseDate", label:"Release Date"}
-										{type:"upload", path:"iconUrl", label:"Exhibit Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
+										{type:"upload", path:"iconUrl", label:"Preview Image", options:{accept:"image/*", filename:"data.thumbFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpeg", "png", "jpg", "gif"]}}}
 										{type:"toggle", path:"isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured?"}}
 									]
 								}
@@ -145,7 +145,7 @@
 						}
 					}
 				]}
-				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
+				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200, types:["webp", "jpeg", "png", "jpg", "gif"]}}
 				{do:"process-tags", paths:"data.tags"}
 				{do:"save"}
 				{do:"forward-to", url: "/{{.StreamID}}"}
@@ -180,7 +180,7 @@
 										{type:"text", path:"label", label:"Exhibit Name"}
 										{type:"select", path:"data.license", label:"License", options:{required:true, provider:"blankpage-exhibit.licenses"}}
 										{type:"date", path:"data.releaseDate", label:"Release Date"}
-										{type:"upload", path:"iconUrl", label:"Exhibit Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
+										{type:"upload", path:"iconUrl", label:"Preview Image", options:{accept:"image/*", filename:"data.thumbFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpg", "jpeg", "png", "gif"]}}}
 										{type:"toggle", path:"isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured?"}}
 									]
 								}
@@ -357,61 +357,6 @@
 				{do:"view-html", file:"children"}
 			]
 		},
-
-		upload: {
-			roles: ["author"]
-			steps: [
-				{do:"as-modal", steps:[
-					{do:"view-html"}
-					{do:"edit", form:{
-						type:"layout-vertical"
-						children:[
-							{type:"text", path:"attachmentLabel", label:"Label"}
-							{type:"textarea", path:"attachmentDescription", label:"Description", description:"A few words to show underneath the filename."}
-							{type:"upload", path:"file", label:"Attachment"}
-						]
-					}, options:["submit-label:Upload Attachment"]}
-					{do:"upload-attachments", category:"other", maximum:8, fieldname:"file", label-fieldname:"attachmentLabel", description-fieldname:"attachmentDescription"}
-					{do:"refresh-page"}
-				]}
-			]
-		}
-
-		edit-upload: {
-			roles: ["author"]
-			steps: [
-				{do:"as-modal", steps:[
-					{do:"with-attachment", steps:[
-						{
-							do:"edit", 
-							options:[
-								"endpoint:/{{.ObjectID}}/edit-upload?attachmentId={{.AttachmentID}}", 
-								"delete:/{{.ObjectID}}/delete-upload?attachmentId={{.AttachmentID}}"
-							]
-							form:{
-								type:"layout-vertical"
-								label:"Edit Attachment",
-								children:[
-									{type:"text", path:"label", label:"Label"}
-									{type:"textarea", path:"description", label:"Description"}
-								]
-							}
-						}
-						{do:"save"}
-						{do:"refresh-page"}
-					]}
-				]}
-			]
-		}
-
-		delete-upload: {
-			roles: ["author"]
-			steps: [
-				{do:"as-confirmation", title:"Delete this Attachment?", message:"Are you sure you want to delete this attachment? There is NO UNDO.", submit:"DELETE"}
-				{do:"delete-attachments"}
-				{do:"refresh-page"}
-			]
-		}
 
 		publish: {
 			roles: ["author"]

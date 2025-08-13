@@ -77,7 +77,7 @@
 
 				<div class="md:flex-row">
 
-					<img class="padding flex-grow-1" id="piece-icon" src="{{imageUrl}}" aria-hidden="true" >
+					<img class="padding flex-grow-1" id="piece-icon" src="{{$attachmentID}}?width=800" aria-hidden="true" >
 
 					<div class="text-sm">
 						<button hx-get="/{{.StreamID}}/intent?intent=create&content={{.Label | queryEscape}} {{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "share"}}</span> Share</button>
@@ -99,11 +99,12 @@
 		
 			</div>
 
-			<div class="md:width-32 flex-shrink-0 flex-grow-0"></div>
-			<div id="work-links" class="md:width-256 flex-shrink-0">
+			<div class="md:width-256 flex-shrink-0 flex-grow-1"></div>
+			<div id="work-links" class=" flex-shrink-0">
+				<div class="text-sm">Category: {{ .Data "category" }}</div>
 
 				{{- if .Tags.NotEmpty -}}
-					<div id="creation-tags" class="text-sm margin-bottom">
+					<div id="creation-tags">
 						{{- range $index, $tag := .Tags -}}
 							{{- if eq "Hashtag" $tag.Type}}
 							<a href="/works?q=%23{{$tag.Name}}" hx-boost="true" class="tag margin-bottom-sm">#{{$tag.Name}}</a>

@@ -33,7 +33,8 @@
 					featured: {type: "boolean"}
 					mature: {type: "boolean"}
 					favorites: {type: "string"}
-					attachmentId: {type: "string"}
+					attachmentId: {type: "string", format:"url"}
+					thumbFilename: {type: "string"}
 					attachmentFilename: {type: "string"}
 					links: {
 						type: object
@@ -91,7 +92,7 @@
 									children: [
 										{type: "text",   path: "label", label: "Creation Title"}
 										{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp", "jpg", "jpeg", "png", "gif"]}}}
-										{type: "upload", path: "iconUrl", label:"Cover Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp", "jpg", "jpeg", "png", "gif"]}}}
+										{type: "upload", path: "iconUrl", label:"Preview Image", options:{accept:"image/*", filename:"data.thumbFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpeg", "png", "jpg", "gif"]}}}
 										{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
 									]
 								}
@@ -132,9 +133,9 @@
 						}
 					}
 				]}
-				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1}
-				{do:"upload-attachments", action:"replace", category:"Artwork", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"image/*", maximum:1, types:["webp", "jpg", "jpeg", "png", "gif"]}
-				{do:"process-tags", paths:"data.tags"}
+				{do:"upload-attachments", category:"image", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp", "jpg", "jpeg", "png", "gif"]}}
+				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200, types:["webp", "jpeg", "png", "jpg", "gif"]}}
+   				{do:"process-tags", paths:"data.tags"}
 				{do:"save-and-publish", outbox:false}
 				{do:"search-index"}
 				{do:"refresh-page"}
@@ -166,7 +167,7 @@
 										children: [
 											{type: "text",   path: "label", label: "Creation Title"}
 											{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*", types:["webp", "jpg", "jpeg", "png", "gif"]}}
-											{type: "upload", path: "iconUrl", label:"Preview Thumbnail", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp", "jpg", "jpeg", "png", "gif"]}}}
+											{type: "upload", path: "iconUrl", label:"Preview Thumbnail", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpg", "jpeg", "png", "gif"]}}}
 											{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
 										]
 									}
@@ -208,7 +209,8 @@
 						}
 					]
 				}
-				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
+				{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1}
+				{do:"upload-attachments", action: "replace", category:"image", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, types:["webp", "jpg", "jpeg", "png", "gif"]}
 				{do:"process-tags", paths:"data.tags"}
 				{do:"save-and-publish"}
 				{do:"search-index"}
@@ -252,7 +254,7 @@
 
 		image: {
 			steps:[
-				{do:"view-attachment", category:"image", format:["webp", "jpeg", "jpg", "gif"], width:800, height:800}
+				{do:"view-attachment", category:"image", format:["webp", "jpeg", "jpg", "png", "gif"], width:800, height:800}
 			]
 		}
 
