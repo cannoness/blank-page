@@ -2,6 +2,10 @@ function apiURL() {
     return "http://localhost:9092/"
 }
 
+function importLinksFromThumbhub() {}
+function importLinksFromDeviantArt() {}
+function importLinksFromTumblr() {}
+
 function renderResults(data, limit, skip) {
 
         htmx.find("#content").innerHTML = data.exhibit;

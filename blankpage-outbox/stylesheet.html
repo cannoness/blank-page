@@ -96,6 +96,14 @@ body {
 {{- end }}
 
 }
+.page {
+	width:95%!important;
+	max-width:1600px;
+	margin-top:24px;
+	margin-bottom: 64px;
+	border: solid 1px var(--page-border);
+	padding: calc(var(--rhythm) * 1.5);
+}
 
 {{- $bannerHex := first (.Data "color-banner") "#a0a0a0" -}}
 {{- $bannerColor := parseColor $bannerHex -}}

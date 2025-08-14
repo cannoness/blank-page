@@ -1,12 +1,12 @@
 {{- $streamID := .StreamID -}}
 {{- $tags := .Tags -}}
+{{- $icon := .IconURL -}}
 {{- $creations := .Children.Top120.ByRank.Slice -}}
 {{- $canEdit := .UserCan "edit" -}}
-{{- $isPlayable := false -}}
 {{- $links := .Data "links" -}}
 {{- range $index, $creation := $creations -}}
-	{{- if ne nil $creation.Data.attachmentId -}}
-		{{- $isPlayable = true -}} 
+	{{- if not .IconURL -}}
+		{{- $icon := $creation.Data.attachmentId -}}
 	{{- end -}}
 {{- end -}}
 {{- $checkoutLabel := first (.Data "checkout label") "Buy Now" -}}

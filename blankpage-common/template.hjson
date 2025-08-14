@@ -26,5 +26,21 @@
 			{value:"CC0", label:"Creative Commons Zero - No Rights Reserved", href:"https://creativecommons.org/public-domain/cc0/", icon:"cc0"},
 			{value:"PUBLIC-DOMAIN", label:"Public Domain", href:"https://creativecommons.org/publicdomain/mark/1.0/", icon:"public-domain"}
 		]
+		"categories": [
+			{value:"DIGITAL", label:"Digital Art", icon:"bezier"},
+			{value:"TRADITIONAL", label:"Traditional Media", icon:"pencil-fill"}
+			{value:"ANIMATED", label:"Animated", icon:"balloon"}
+			{value:"FRACTAL", label:"Fractals", icon:"flower2"}
+			{value:"ARTISAN", label:"Artisan Crafts", icon:"tools"}
+			{value:"STOCK-IMAGE", label:"Stock Art", icon:"transparency"}
+			{value:"PHOTOGRAPHY", label:"Photography", icon:"camera"}
+			{value:"MIXED-MEDIA", label:"Mixed Media", icon:"regex"}
+			{value:"COSPLAY", label:"Cosplay", icon:"person-arms-up"},
+			{value:"AUDIO", label:"Audio",  icon:"music-note"}
+			{value:"LIT", label:"Literature",  icon:"book"}
+			{value:"COMIC", label:"Comics and Graphic Novels",  icon:"journal-richtext"}
+			{value:"POETRY", label:"Poetry", icon:"vector-pen"}
+			{value:"PROGRAM", label:"Programs and Applications", icon:"code-slash"}
+		]
 	}
 }

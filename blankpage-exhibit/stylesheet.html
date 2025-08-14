@@ -95,7 +95,14 @@ body {
 #media-controls > .playing-hide {
 	display: initial;
 }
-
+.page {
+	width:95%!important;
+	max-width:1600px;
+	margin-top:24px;
+	margin-bottom: 64px;
+	border: solid 1px var(--page-border);
+	padding: calc(var(--rhythm) * 1.5);
+}
 .work.PLAYING {
 	background-color: var(--gray20);
 }
@@ -182,6 +189,7 @@ h1{
   text-shadow: 1px 5px 10px black;
   transition-duration: .3s;
   color:azure;
+  z-index: 11111;
 }
 
 .text {
@@ -196,7 +204,8 @@ h1{
   display:none;
   margin-right: -50%;
   transition-duration: .3s;
-  transform: translate(-50%, -50%)
+  transform: translate(-50%, -50%);
+  z-index: 11111;
 }
 
 .container:hover img{
@@ -280,7 +289,7 @@ h1{
 
 	/* Sizing for visible dialog */
 	width:80%;
-	max-width:600px;
+	max-width:800px;
 
 	/* Display properties for visible dialog*/
 	border:solid 1px #999;
@@ -294,7 +303,25 @@ h1{
 	animation-duration:150ms;
 	animation-timing-function: ease;
 }
-
+#modal-window {
+    width: 900px!important;
+    max-width: 99vw;
+    max-height: 99vh;
+    display: flow-root;
+    overflow-y: auto;
+    position: relative;
+    border: solid 1px var(--gray40);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,.3);
+    background-color: var(--page-background);
+    padding: calc(var(--rhythm) * 2);
+    line-height: 150%;
+    margin-top: 24px;
+    transform: scale(.9);
+    transition: transform;
+    transition-duration: 120ms;
+    transition-timing-function: ease;
+}
 #modal.closing {
 	/* Animate when closing */
 	animation-name: fadeOut;

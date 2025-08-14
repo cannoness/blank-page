@@ -1,10 +1,6 @@
-<!--{{- $results := .Children.Top60.Slice -}}-->
 <!--{{- $canEdit := .UserCan "edit" -}}-->
 <!--{{- $isowner := .IsOwner -}}-->
-<!--{{- if $results.NotEmpty -}}-->
-
-
-{{- $results := .Children.Top6.Slice -}}
+{{- $results := .Children.Top60.Slice -}}
 {{- if not $results.IsEmpty -}}
 
 	<style>{{- template "stylesheet" . -}}</style>
@@ -14,25 +10,28 @@
 <!--            </span>-->
 
 	{{- range $index, $result := $results -}}
-		<div class="container">
-			<span class="title"> {{$result.Data.title}} </span>
-			<span class="text">
-				Favorites: {{ $result.Data.favorites }}<br/>
-				Date Created: {{ $result.Data.dateCreated }}<br/>
-				Tags: {{ $result.Data.tags }}<br/>
-				Category: {{ $result.Data.category }}<br/>
-			</span>
-			<div streamId="{{.StreamID}}" class="item">
-				<div
-					hx-get="/{{.Token}}"
-					hx-push-url="true"
-					class="clickable card"
-					style="overflow:hidden; aspect-ratio:1;">
-					<img src="{{ .IconURL }}?width=150" class="width-100%">
-				</div>
+		{{- $icon := .IconURL -}}
+		{{- if not .IconURL -}}
+			{{- $icon = $result.Data.attachmentId -}}
+		{{- else if not $result.Data.attachmentId -}}
+			{{- $icon = $results.Data.imageUrl -}}
+		{{- end -}}
+		<div streamId="{{.StreamID}}" class="container item">
+			<div
+				hx-get="/{{.Token}}"
+				hx-push-url="true"
+				class="clickable card"
+				style="overflow:hidden; aspect-ratio:1;">
+					<img src="{{$icon}}">
+					<span class="title"> {{.Label}} </span>
+					<span class="text">
+						Favorites: {{ $result.Data.favorites }}<br/>
+						Date Created: {{ $result.Data.dateCreated }}<br/>
+{{- with $result.Data.category -}}Tags:{{ $result.Data.tags }}<br/>{{- end -}}
+{{- with $result.Data.category -}}Category: {{ $result.Data.category }}<br/>{{- end -}}
+					</span>
 			</div>
 		</div>
-
 	{{- end -}}
 
 {{- end -}}

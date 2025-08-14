@@ -5,15 +5,17 @@
 {{- $attachmentID := .Data "attachmentId" -}}
 {{- $duration := .Data "length"}}
 {{- $iconURL := .IconURL -}}
+{{- $imageURL := .Data "imageUrl" -}}
 
 {{- if eq "" $iconURL -}}
-	{{- $iconURL =  $exhibit.IconURL -}}
+	{{- $iconURL = .Data "attachmentId" -}}
+{{- else if eq "" $iconURL -}}
+	{{- $iconURL = $imageURL -}}
 {{- end -}}
 
-<div id="work-{{.StreamID}}" class="page padding-none">
+<style>{{- template "stylesheet" . -}}</style>
+<div id="work-{{.StreamID}}" class="page padding-none margin-none">
 
-	<link rel="stylesheet" href="/{{.ParentID}}/stylesheet">
-	
 	<!-- oEmbed: https://oembed.com -->
 	<link rel="alternate" type="application/json+oembed" href="{{.OEmbedJSON}}">
 	<link rel="alternate" type="text/xml+oembed" href="{{.OEmbedXML}}">
@@ -76,9 +78,9 @@
 
 
 				<div class="md:flex-row">
-
-					<img class="padding flex-grow-1" id="piece-icon" src="{{$attachmentID}}?width=800" aria-hidden="true" >
-
+					<a href="{{$iconURL}}" class="piece" rel=”noreferrer target="_SEJ">
+						<img class="padding piece" id="piece" src="{{$attachmentID}}" aria-hidden="true">
+					</a>
 					<div class="text-sm">
 						<button hx-get="/{{.StreamID}}/intent?intent=create&content={{.Label | queryEscape}} {{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "share"}}</span> Share</button>
 						<button hx-get="/{{.StreamID}}/intent?intent=like&object={{.Permalink}}"><span aria-hidden="true" class="margin-left-xs">{{icon "thumbs-up"}}</span> Like</button>
