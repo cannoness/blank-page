@@ -258,5 +258,13 @@
 				{do:"view-attachment", category:"literature", format:["text"], width:800, height:800}
 			]
 		}
+		editor: {
+					roles: ["author", "editor"]
+					steps: [
+						{do:"with-draft", steps: [
+							{do:"edit-content", file:"editor", format:"EDITORJS"}
+						]}
+					]
+				}
 	}
 }
