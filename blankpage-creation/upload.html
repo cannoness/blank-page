@@ -1,5 +1,6 @@
-<form method="post" hx-post="http://localhost:8080/{{.StreamID}}/add-creation" hx-swap="none" hx-push-url="false" hx-encoding="multipart/form-data" hx-trigger="submit" data-script="init send checkFormRules(changed:me as Values)">
-    <div class="layout-title">+ Add a Creation</div>
+
+<form method="post" hx-post="/{{.StreamID}}/create" hx-swap="none" hx-push-url="false" hx-encoding="multipart/form-data" hx-trigger="submit" data-script="init send checkFormRules(changed:me as Values)">
+    <div class="layout-title">Edit Creation</div>
     <div class="tabs" data-script="install TabContainer">
         <div role="tablist">
             <button type="button" role="tab" id="tab-tabcontainer-0" class="tab-label" aria-controls="panel-tabcontainer-0" tabIndex="0" aria-selected="true">General</button>
@@ -11,24 +12,20 @@
             <div class="layout layout-vertical">
                 <div class="layout-elements">
                     <div class="layout-element layout-vertical-element">
-                        <label for="label.text" aria-hidden="true">Song Title</label>
-                        <input name="label" id="label.text" aria-label="Song Title" tabIndex="0" type="text" required="true">
+                        <label for="label.text" aria-hidden="true">Creation Title</label>
+                        <input name="label" id="label.text" aria-label="Creation Title" tabIndex="0" type="text">
                     </div>
                     <div class="layout-element layout-vertical-element">
-                        <label for="data.attachmentId.upload" aria-hidden="true">Audio File</label>
-                        <input type="file" name="data.attachmentId" id="data.attachmentId.upload" accept="audio/*" aria-label="Audio File" tabIndex="0">
+                        <label for="data.attachmentId.upload" aria-hidden="true">Artwork File</label>
+                        <input type="file" name="data.attachmentId" id="data.attachmentId.upload" accept="image/*" aria-label="Artwork File" tabIndex="0">
                     </div>
                     <div class="layout-element layout-vertical-element">
-                        <label for="iconUrl.upload" aria-hidden="true">Cover Art</label>
-                        <input type="file" name="iconUrl" id="iconUrl.upload" accept="image/*" aria-label="Cover Art" tabIndex="0">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.length.text" aria-hidden="true">Length</label>
-                        <input name="data.length" id="data.length.text" aria-label="Length" tabIndex="0" type="text">
+                        <label for="iconUrl.upload" aria-hidden="true">Preview Thumbnail</label>
+                        <input type="file" name="iconUrl" id="iconUrl.upload" accept="image/*" aria-label="Preview Thumbnail" tabIndex="0">
                     </div>
                     <div class="layout-element layout-vertical-element">
                         <label for="isFeatured.toggle" aria-hidden="true"></label>
-                        <span id="toggle-isFeatured-false" data-script="install toggle " name="isFeatured" true-text="Featured. Highlighted on track list" false-text="Featured?"></span>
+                        <span id="toggle-isFeatured-false" data-script="install toggle " name="isFeatured" true-text="Featured. Highlighted on work list" false-text="Featured?"></span>
                     </div>
                 </div>
             </div>
@@ -37,13 +34,13 @@
             <div class="layout layout-vertical">
                 <div class="layout-elements">
                     <div class="layout-element layout-vertical-element">
-                        <label for="data.lyrics.textarea" aria-hidden="true"></label>
-                        <textarea name="data.lyrics" id="data.lyrics.textarea" hint="Enter lyrics or song description.  Displays on this song&#39;s detail page." rows="16" aria-labelledby="data.lyrics.textarea.label" aria-describedby="data.lyrics.textarea.description" tabIndex="0"></textarea>
-                        <div aria-hidden="true" class="text-sm gray40">Enter lyrics or song description.  Displays on this song's detail page.</div>
+                        <label for="data.summary.textarea" aria-hidden="true"></label>
+                        <textarea name="data.summary" id="data.summary.textarea" hint="Enter summary or creation description.  Displays on this creation&#39;s detail page." rows="16" aria-labelledby="data.summary.textarea.label" aria-describedby="data.summary.textarea.description" tabIndex="0"></textarea>
+                        <div aria-hidden="true" class="text-sm gray40">Enter summary or creation description.  Displays on this creation's detail page.</div>
                     </div>
                     <div class="layout-element layout-vertical-element">
-                        <label for="data.explicit.toggle" aria-hidden="true"></label>
-                        <span id="toggle-data-explicit-" data-script="install toggle " name="data.explicit" true-text="Explicit Lyrics" value="true" false-text="Explicit Lyrics"></span>
+                        <label for="data.mature.toggle" aria-hidden="true"></label>
+                        <span id="toggle-data-mature-" data-script="install toggle " name="data.mature" true-text="Mature Content" false-text="Mature Content"></span>
                     </div>
                 </div>
             </div>
@@ -67,41 +64,37 @@
                         </select>
                     </div>
                     <div class="layout-element layout-vertical-element">
+                        <label for="data.category.select" aria-hidden="true">Category</label>
+                        <select id="data.category.select" name="data.category" aria-labelledby="data.category.select.label" aria-describedby="data.category.select.description" tabIndex="0">
+                            <option></option>
+                            <option value="DIGITAL">Digital Art</option>
+                            <option value="TRADITIONAL">Traditional Media</option>
+                            <option value="ANIMATED">Animated</option>
+                            <option value="FANART">Fan Art</option>
+                            <option value="FRACTAL">Fractals</option>
+                            <option value="ARTISAN">Artisan Crafts</option>
+                            <option value="STOCK-IMAGE">Stock Art</option>
+                            <option value="PHOTOGRAPHY">Photography</option>
+                            <option value="MIXED-MEDIA">Mixed Media</option>
+                            <option value="COMIC">Comics and Graphic Novels</option>
+                            <option value="COSPLAY">Cosplay</option>
+                            <option value="AUDIO">Audio</option>
+                            <option value="FICTION">Fiction</option>
+                            <option value="FANFIC">Fan Fiction</option>
+                            <option value="NON-FICTION">Non-Fiction</option>
+                            <option value="POETRY-LYRICS">Poetry and Lyrics</option>
+                            <option value="PROGRAM">Programs and Applications</option>
+                        </select>
+                    </div>
+                    <div class="layout-element layout-vertical-element">
                         <label for="data.tags.text" aria-hidden="true">Tags</label>
                         <input name="data.tags" id="data.tags.text" aria-label="Tags" aria-description="Enter #Hashtags separated by spaces." tabIndex="0" type="text" value="#test #anexhibit #stuffyouhaveuploaded">
                         <div aria-hidden="true" class="text-sm gray40">Enter #Hashtags separated by spaces.</div>
                     </div>
                     <div class="layout-element layout-vertical-element">
-                        <label for="data.genre.text" aria-hidden="true">Genre</label>
-                        <input name="data.genre" id="data.genre.text" aria-label="Genre" tabIndex="0" type="text">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.hubber.text" aria-hidden="true">Hubber</label>
-                        <input name="data.hubber" id="data.hubber.text" aria-label="Hubber" tabIndex="0" type="text" value="Delightfully Inane">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.composer.text" aria-hidden="true">Composer</label>
-                        <input name="data.composer" id="data.composer.text" aria-label="Composer" tabIndex="0" type="text">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.producer.text" aria-hidden="true">Producer</label>
-                        <input name="data.producer" id="data.producer.text" aria-label="Producer" tabIndex="0" type="text">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.publisher.text" aria-hidden="true">Publisher</label>
-                        <input name="data.publisher" id="data.publisher.text" aria-label="Publisher" tabIndex="0" type="text">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.category.text" aria-hidden="true">Category</label>
-                        <input name="data.category" id="data.category.text" aria-label="Category" tabIndex="0" type="text">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.favorites.text" aria-hidden="true">Favorites</label>
-                        <input name="data.favorites" id="data.favorites.text" aria-label="Favorites" tabIndex="0" type="text">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.isrc.text" aria-hidden="true">ISRC</label>
-                        <input name="data.isrc" id="data.isrc.text" aria-label="ISRC" tabIndex="0" type="text">
+                        <label for="data.tags.text" aria-hidden="true">Tags</label>
+                        <input name="data.tags" id="data.tags.text" aria-label="Tags" aria-description="Enter #Tags separated by spaces." tabIndex="0" type="text" value="#test #anexhibit #stuffyouhaveuploaded">
+                        <div aria-hidden="true" class="text-sm gray40">Enter #Tags separated by spaces.</div>
                     </div>
                 </div>
             </div>
@@ -110,40 +103,20 @@
             <div class="layout layout-vertical">
                 <div class="layout-elements">
                     <div class="layout-element layout-vertical-element">
-                        <label for="data.streamURL.text" aria-hidden="true">Video Stream URL</label>
-                        <input name="data.streamURL" id="data.streamURL.text" aria-label="Video Stream URL" tabIndex="0" type="url">
+                        <label for="data.links.DEVIANTART.text" aria-hidden="true"></label>
+                        <input name="data.links.DEVIANTART" id="data.links.DEVIANTART.text" tabIndex="0" placeholder="DeviantArt" type="url">
                     </div>
                     <div class="layout-element layout-vertical-element">
-                        <label for="data.links.AMAZON.text" aria-hidden="true"></label>
-                        <input name="data.links.AMAZON" id="data.links.AMAZON.text" tabIndex="0" placeholder="Amazon Music" type="url">
+                        <label for="data.links.PIXELFED.text" aria-hidden="true"></label>
+                        <input name="data.links.PIXELFED" id="data.links.PIXELFED.text" tabIndex="0" placeholder="PixelFed" type="url">
                     </div>
                     <div class="layout-element layout-vertical-element">
-                        <label for="data.links.APPLE.text" aria-hidden="true"></label>
-                        <input name="data.links.APPLE" id="data.links.APPLE.text" tabIndex="0" placeholder="Apple Music" type="url">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.links.BANDCAMP.text" aria-hidden="true"></label>
-                        <input name="data.links.BANDCAMP" id="data.links.BANDCAMP.text" tabIndex="0" placeholder="Bandcamp" type="url">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.links.GOOGLE.text" aria-hidden="true"></label>
-                        <input name="data.links.GOOGLE" id="data.links.GOOGLE.text" tabIndex="0" placeholder="Google Play" type="url">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.links.SOUNDCLOUD.text" aria-hidden="true"></label>
-                        <input name="data.links.SOUNDCLOUD" id="data.links.SOUNDCLOUD.text" tabIndex="0" placeholder="Soundcloud" type="url">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.links.SPOTIFY.text" aria-hidden="true"></label>
-                        <input name="data.links.SPOTIFY" id="data.links.SPOTIFY.text" tabIndex="0" placeholder="Spotify" type="url">
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.links.TIDAL.text" aria-hidden="true"></label>
-                        <input name="data.links.TIDAL" id="data.links.TIDAL.text" tabIndex="0" placeholder="Tidal" type="url">
+                        <label for="data.links.TUMBLR.text" aria-hidden="true"></label>
+                        <input name="data.links.TUMBLR" id="data.links.TUMBLR.text" tabIndex="0" placeholder="Tumblr" type="url">
                     </div>
                     <div class="layout-element layout-vertical-element">
                         <label for="data.links.YOUTUBE.text" aria-hidden="true"></label>
-                        <input name="data.links.YOUTUBE" id="data.links.YOUTUBE.text" tabIndex="0" placeholder="YouTube Music" type="url">
+                        <input name="data.links.YOUTUBE" id="data.links.YOUTUBE.text" tabIndex="0" placeholder="YouTube" type="url">
                     </div>
                     <div class="layout-element layout-vertical-element">
                         <label for="data.links.OTHER1.text" aria-hidden="true"></label>

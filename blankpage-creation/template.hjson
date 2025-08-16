@@ -96,13 +96,14 @@
 			steps: [
 				{do:"view-html"}
 			]
-		},
+		}
+
 		upload: {
 			roles: ["author"],
 			steps: [
 				{do: "view-html"}
 			]
-		},
+		}
 
 		edit: {
 			roles: ["author"]
