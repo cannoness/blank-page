@@ -8,9 +8,7 @@
 {{- $imageURL := .Data "imageUrl" -}}
 
 {{- if eq "" $iconURL -}}
-	{{- $iconURL = .Data "attachmentId" -}}
-{{- else if eq "" $iconURL -}}
-	{{- $iconURL = $imageURL -}}
+	{{- $iconURL =  $exhibit.IconURL -}}
 {{- end -}}
 
 <style>{{- template "stylesheet" . -}}</style>

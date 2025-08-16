@@ -3,7 +3,7 @@
 	templateRole: writing
 	model: Stream
 	label: Writing
-	extends: ["base-intent", "blankpage-common"]
+	extends: ["base-intent", "blankpage-common", "article-markdown"]
 	containedBy: ["exhibit"]
 
 	states: {
@@ -259,7 +259,7 @@
 			]
 		}
 		editor: {
-					roles: ["author", "editor"]
+					roles: ["author"]
 					steps: [
 						{do:"with-draft", steps: [
 							{do:"edit-content", file:"editor", format:"EDITORJS"}

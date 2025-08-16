@@ -16,13 +16,13 @@
 	schema: {
 		type: object
 		properties: {
-			label: {type: "string", required: true}
+			label: {type: "string"}
 			iconUrl: {type:"string", format:"url"}
 			data: {
 				type: object
 				properties: {
 					tags: {type:"string"}
-					category: {type: "string", required: true}
+					category: {type: "string"}
 					genre: {type: "string"}
 					hubber: {type: "string"}
 					license: {type: "string"}
@@ -67,7 +67,7 @@
 
 	search: {
 		type: Artwork
-		iconUrl:"{{first .IconURL (join `/` .ParentID.Hex `/icon`)}}"
+		thumbUrl:"{{first .IconURL (join `/` .ParentID.Hex `/icon`)}}"
 		summary:""
 		text: "{{.Label}} {{.AttributedTo.Name}} {{index .Data `summary`}}"
 		tags: "LIC:{{index .Data `license`}}"
@@ -80,60 +80,11 @@
 			roles: ["author"]
 			steps: [
 				{do:"as-modal", steps:[
-					{
-						do:"edit"
-						form:{
-							type: layout-tabs
-							label: "+ Add a Creation"
-							children: [
-								{
-									type: layout-vertical
-									label: General
-									children: [
-										{type: "text",   path: "label", label: "Creation Title"}
-										{type: "text",   path: "data.imageUrl", label: "Paste a link to the image to avoid uploading."}
-										{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*", rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}}
-										{type: "upload", path: "iconUrl", label:"Preview Image", options:{accept:"image/*", filename:"data.thumbFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpeg", "png", "jpg", "gif"]}}}
-										{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Description
-									children: [
-										{type: "textarea", path: "data.summary", description:"Enter summary or creation description.  Displays on this creation's detail page.", options:{rows: 16}}
-										{type: "toggle", path: "data.mature", options:{true-text:"Mature Content", false-text:"Mature Content"}}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Metadata
-									children: [
-										{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}}
-										{type: "select", path: "data.category", label: "Category", options:{provider:"blankpage-exhibit.categories"}}
-										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Tags separated by spaces."}
-										{type: "text", path: "data.genre", label: "Genre"}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Links
-									children: [
-                                        {type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
-										{type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
-										{type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
-										{type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
-										{type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
-										{type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
-										{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
-									]
-								}
-							]
-						}
-					}
+					{do: "view-html", file: "upload"}
+
 				]}
-				{do:"upload-attachments", category:"image", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
-				{do:"upload-attachments", category:"artwork", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200}, rules:{types:["webp", "jpeg", "png", "jpg", "gif"]}}
+				{do:"upload-attachments", category:"Artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
+				{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200}, rules:{types:["webp", "jpeg", "png", "jpg", "gif"]}}
    				{do:"process-tags", paths:"data.tags"}
 				{do:"save-and-publish", outbox:false}
 				{do:"search-index"}
@@ -145,7 +96,13 @@
 			steps: [
 				{do:"view-html"}
 			]
-		}
+		},
+		upload: {
+			roles: ["author"],
+			steps: [
+				{do: "view-html"}
+			]
+		},
 
 		edit: {
 			roles: ["author"]
@@ -207,7 +164,7 @@
 					]
 				}
 				{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1,  rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
-				{do:"upload-attachments", action: "replace", category:"artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
+				{do:"upload-attachments", action: "replace", category:"Artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
 				{do:"process-tags", paths:"data.tags"}
 				{do:"if", condition: "{{.IsPublished}}",
 					then: [
@@ -280,7 +237,7 @@
 
 		artwork: {
 			steps:[
-				{do:"view-attachment", category:"artwork", format:["webp", "jpeg", "gif", "jpg", "png"]}
+				{do:"view-attachment", category:"Artwork", format:["webp", "jpeg", "gif", "jpg", "png"]}
 			]
 		}
 	}
