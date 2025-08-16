@@ -226,7 +226,7 @@
 				{do:"process-tags", paths:"data.tags"}
 				{do:"search-index"}
 				
-				{do:"if", condition: "{{.IsPublished}}", 
+				{do:"if", condition: "{{.IsPublished}}",
 					then: [
 						{do:"save-and-publish"}
 					], 
@@ -275,6 +275,7 @@
 						"data.hubber":"{{.AttributedTo.Name}}"
 						"data.tags":"{{.Data `tags`}}"
 						"data.license": "{{.Data `license`}}"
+						"data.exhibit":"{{.StreamID}}"
 					}
 				}
 			//	{do:"set-header", name:"Hx-Retarget", value:"main"}
@@ -460,6 +461,12 @@
 			]
 		}
 
+		upload: {
+			roles: ["author"],
+			steps: [
+				{do: "view-html"}
+			]
+		}
 
 		add-new-creation: {
 			roles: ["author"]

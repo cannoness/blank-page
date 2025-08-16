@@ -1,6 +1,6 @@
 <div data-hx-target="this" data-hx-swap="outerHTML" data-hx-push-url="false">
-
-<form method="post" hx-post="{{.Host}}/{{- .Parent 'StreamID' -}}/add-new-creation" hx-swap="none" hx-push-url="false" hx-encoding="multipart/form-data" hx-trigger="submit" data-script="init send checkFormRules(changed:me as Values)">
+    @{{ .StreamID }}
+<form method="post" hx-post="/@{{.StreamID}}/add-new-creation" hx-swap="none" hx-push-url="false" hx-encoding="multipart/form-data" hx-trigger="submit" data-script="init send checkFormRules(changed:me as Values)">
     <div class="layout-title"> + Add a Creation</div>
     <div class="tabs" data-script="install TabContainer">
         <div role="tablist">
@@ -14,6 +14,7 @@
                 <div class="layout-elements">
                     <div class="layout-element layout-vertical-element">
                         <label for="label.text" aria-hidden="true">Creation Title</label>
+
                         <input name="label" id="label.text" aria-label="Creation Title" tabIndex="0" type="text">
                     </div>
                     <div class="layout-element layout-vertical-element">

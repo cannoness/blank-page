@@ -3,7 +3,7 @@
 	templateRole: writing
 	model: Stream
 	label: Writing
-	extends: ["base-intent", "blankpage-common", "article-markdown"]
+	extends: ["base-intent", "blankpage-common"]
 	containedBy: ["exhibit"]
 
 	states: {

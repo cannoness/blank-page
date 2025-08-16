@@ -33,6 +33,7 @@
 					featured: {type: "boolean"}
 					mature: {type: "boolean"}
 					favorites: {type: "string"}
+					exhibit: {type: "string"}
 					attachmentId: {type: "string", format:"url"}
 					thumbFilename: {type: "string"}
 					attachmentFilename: {type: "string"}
@@ -191,7 +192,7 @@
 			roles: ["author"],
 			steps: [
 				{do:"delete", title:"Delete this Creation?"}
-				{do:"redirect-to", url:"/{{.StreamID}}"}
+				{do:"redirect-to", url:"/{{.ParentURL}}"}
 			]
 		}
 
