@@ -460,29 +460,71 @@
 			]
 		}
 
-		upload-paid-attachment: {
-			roles: ["author", "editor"]
+
+		add-new-creation: {
+			roles: ["author"]
 			steps: [
-				{do:"as-modal", steps:[
+				{do:"with-upload", steps:[
 					{
-						do:"edit"
+						do:"edit",
 						form:{
-							type:"layout-vertical"
-							label:"Upload an Exclusive File"
-							children:[
-								{type:"text", path:"attachmentLabel", label:"Label"}
-								{type:"textarea", path:"attachmentDescription", label:"Description", description:"A few words to show underneath the filename."}
-								{type:"upload", path:"file", label:"Attachment"}
+							type: layout-tabs
+							label: "+ Add a Creation"
+							children: [
+								{
+									type: layout-vertical
+									label: General
+									children: [
+										{type: "text",   path: "label", label: "Creation Title"}
+										{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*",  rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}}
+										{type: "upload", path: "iconUrl", label:"Preview Thumbnail", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpg", "jpeg", "png", "gif"]}}}
+										{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
+									]
+								}
+								{
+									type: layout-vertical
+									label: Description
+									children: [
+										{type: "textarea", path: "data.summary", description:"Enter summary or creation description.  Displays on this creation's detail page.", options:{rows: 16}}
+										{type: "toggle", path: "data.mature", options:{true-text:"Mature Content", false-text:"Mature Content"}}
+									]
+								}
+								{
+									type: layout-vertical
+									label: Metadata
+									children: [
+										{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}}
+										{type: "select", path: "data.category", label: "Category", options:{provider:"blankpage-exhibit.categories"}}
+										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."}
+										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Tags separated by spaces."}
+									]
+								}
+								{
+									type: layout-vertical
+									label: Links
+									children: [
+										{type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
+										{type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
+										{type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
+										{type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
+										{type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
+										{type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
+										{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
+									]
+								}
 							]
-						}, 
-						options:["submit-label:Upload Exclusive File"]
+						}
 					}
-					{do:"upload-attachments", category:"paid", maximum:6, fieldname:"file", label-fieldname:"attachmentLabel", description-fieldname:"attachmentDescription"}
-					{do:"refresh-page"}
+
 				]}
+				{do:"upload-attachments", category:"Artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
+				{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200}, rules:{types:["webp", "jpeg", "png", "jpg", "gif"]}}
+   				{do:"process-tags", paths:"data.tags"}
+				{do:"save-and-publish", outbox:false}
+				{do:"search-index"}
+				{do:"refresh-page"}
 			]
 		}
-
 		edit-paid-attachment: {
 			roles: ["author", "editor"]
 			steps: [

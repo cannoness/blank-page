@@ -1,6 +1,7 @@
+<div data-hx-target="this" data-hx-swap="outerHTML" data-hx-push-url="false">
 
-<form method="post" hx-post="/{{.StreamID}}/add-creation" hx-swap="none" hx-push-url="false" hx-encoding="multipart/form-data" hx-trigger="submit" data-script="init send checkFormRules(changed:me as Values)">
-    <div class="layout-title">Edit Creation</div>
+<form method="post" hx-post="{{.Host}}/{{- .Parent 'StreamID' -}}/add-new-creation" hx-swap="none" hx-push-url="false" hx-encoding="multipart/form-data" hx-trigger="submit" data-script="init send checkFormRules(changed:me as Values)">
+    <div class="layout-title"> + Add a Creation</div>
     <div class="tabs" data-script="install TabContainer">
         <div role="tablist">
             <button type="button" role="tab" id="tab-tabcontainer-0" class="tab-label" aria-controls="panel-tabcontainer-0" tabIndex="0" aria-selected="true">General</button>
@@ -88,11 +89,6 @@
                     </div>
                     <div class="layout-element layout-vertical-element">
                         <label for="data.tags.text" aria-hidden="true">Tags</label>
-                        <input name="data.tags" id="data.tags.text" aria-label="Tags" aria-description="Enter #Hashtags separated by spaces." tabIndex="0" type="text" value="#test #anexhibit #stuffyouhaveuploaded">
-                        <div aria-hidden="true" class="text-sm gray40">Enter #Hashtags separated by spaces.</div>
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.tags.text" aria-hidden="true">Tags</label>
                         <input name="data.tags" id="data.tags.text" aria-label="Tags" aria-description="Enter #Tags separated by spaces." tabIndex="0" type="text" value="#test #anexhibit #stuffyouhaveuploaded">
                         <div aria-hidden="true" class="text-sm gray40">Enter #Tags separated by spaces.</div>
                     </div>
@@ -142,3 +138,4 @@
         </div>
     </div>
 </form>
+</div>
