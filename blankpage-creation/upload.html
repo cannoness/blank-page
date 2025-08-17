@@ -25,8 +25,8 @@
                         <input type="file" name="iconUrl" id="iconUrl.upload" accept="image/*" aria-label="Preview Thumbnail" tabIndex="0">
                     </div>
                     <div class="layout-element layout-vertical-element">
-                        <label for="isFeatured.toggle" aria-hidden="true"></label>
-                        <span id="toggle-isFeatured-false" data-script="install toggle " name="isFeatured" true-text="Featured. Highlighted on work list" false-text="Featured?"></span>
+                        <label for="featured.toggle" aria-hidden="true"></label>
+                        <span id="toggle-featured-false" data-script="install toggle " name="featured" true-text="Featured. Highlighted on work list" false-text="Featured?"></span>
                     </div>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                     </div>
                     <div class="layout-element layout-vertical-element">
                         <label for="data.mature.toggle" aria-hidden="true"></label>
-                        <span id="toggle-data-mature-" data-script="install toggle " name="data.mature" true-text="Mature Content" false-text="Mature Content"></span>
+                        <span id="toggle-data-mature" data-script="install toggle " name="data.mature" true-text="Mature Content" false-text="Mature Content"></span>
                     </div>
                 </div>
             </div>
@@ -138,10 +138,11 @@
         </div>
     </div>
 </form>
-</div>	<div
-		hx-get="/{{.StreamID}}/add-creation"
-		hx-trigger="refreshPage from:window"
-		hx-target="#main"
-		hx-swap="innerHTML"
-		hx-push-url="false">
-	</div>
+</div>
+<div
+    hx-get="/{{.StreamID}}/add-creation"
+    hx-trigger="refreshPage from:window"
+    hx-target="#main"
+    hx-swap="innerHTML"
+    hx-push-url="false">
+</div>
