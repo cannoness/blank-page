@@ -15,15 +15,18 @@
 				wildcard: string
 				properties: {
 					tags: {type:"string"}
+					show-albums: {type:"string"}
 					show-exhibits: {type:"string"}
 					show-events: {type:"string"}
 					show-news: {type:"string"}
 					shop-url: {type:"string", format:"url"}
+					label-albums: {type:"string", default:"Albums"}
 					label-exhibits: {type:"string", default:"Exhibits"}
 					label-events: {type:"string", default:"Events"}
 					label-news: {type:"string", default:"News"}
 					label-shop: {type:"string", default:"Shop"}
 					description-exhibits: {type:"string"}
+					description-albums: {type:"string"}
 					description-events: {type:"string"}
 					description-news: {type:"string"}
 					background-body: {type:"string", format:"uri"}
@@ -69,6 +72,7 @@
 					do:"set-data", 
 					values:{
 						"data.label-exhibits":"Exhibits"
+						"data.label-albums":"Albums"
 						"data.label-events":"Events"
 						"data.label-news":"News"
 						"data.label-shop":"Shop"
@@ -95,7 +99,13 @@
 				]}
 			]
 		}
-		
+
+		albums: {
+			roles: ["anonymous"]
+			steps:[
+				{do:"view-html"}
+			]
+		}
 		exhibits: {
 			roles: ["anonymous"]
 			steps:[
@@ -117,7 +127,23 @@
 				{do:"view-html"}
 			]
 		}
-
+		add-album: {
+			roles: ["self"]
+			steps: [
+				{
+					do: add-stream
+					style: inline
+					location: outbox
+					template: bandwagon-album
+					label: + Add Album
+					set-permissions: {copy:true, editor:["self"]}
+					with-data:{data.tags:"{{.Data `tags`}}"}
+				}
+				{do:"set-data", values:{"data.show-albums":"true"}}
+				{do:"save"}
+				{do:"refresh-page"}
+			]
+		}
 		add-exhibit: {
 			roles: ["self"]
 			steps: [
@@ -291,6 +317,26 @@
 			] 
 		}
 
+		edit-albums: {
+			roles: ["self"]
+			steps: [
+				{do: "as-modal", background:"view", steps:[
+					{
+						do: "edit"
+						form:{
+							type: layout-vertical
+							label: Edit Albums
+							children: [
+								{type:"text", path:"data.label-albums", label:"Title Text", description:"Used on profile, and at top of 'Albums' page.", options:{placeholder:"Albums"}}
+								{type:"textarea", path:"data.description-albums", label:"Top of Page Text", description:"Text to show at the top of this page. Markdown is allowed.", options:{rows:8}}
+							]
+						}
+					}
+					{do:"save"}
+					{do:"refresh-page"}
+				]}
+			]
+		}
 		edit-exhibits: {
 			roles: ["self"]
 			steps: [
@@ -366,6 +412,15 @@
 							label: Edit Menu
 							type:layout-tabs
 							children: [
+								{
+									type: layout-vertical
+									label: Albums
+									children: [
+										{type:"toggle", path:"data.show-albums", options:{text:"Display 'Albums' in Menu Bar"}}
+										{type:"text", path:"data.label-albums", label:"Menu Bar Text", options:{placeholder:"Albums"}}
+										{type:"textarea", path:"data.description-albums", label:"Top of Page Text", description:"Text to show at the top of the 'Albums' section. Markdown is allowed.", options:{rows:8}}
+									]
+								}
 								{
 									type: layout-vertical
 									label: Exhibits

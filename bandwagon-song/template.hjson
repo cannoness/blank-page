@@ -1,10 +1,10 @@
 {
-	templateId: blankpage-sound
+	templateId: bandwagon-song
 	templateRole: song
 	model: Stream
 	label: Song
 	extends: ["base-intent", "blankpage-common"]
-	containedBy: ["exhibit"]
+	containedBy: ["album"]
 
 	states: {
 		published: {
@@ -19,12 +19,12 @@
 			label: {type: "string", required: true}
 			iconUrl: {type:"string", format:"url"}
 			data: {
-				type: object
+				type: object 
 				properties: {
 					tags: {type:"string"}
 					length: {type: "string"}
 					genre: {type: "string"}
-					hubber: {type: "string"}
+					artist: {type: "string"}
 					composer: {type: "string"}
 					producer: {type: "string"}
 					publisher: {type: "string"}
@@ -33,8 +33,7 @@
 					lyrics: {type: "string"}
 					streamURL: {type: "string", format:"url"}
 					featured: {type: "boolean"}
-					mature: {type: "boolean"}
-					favorites: {type: "string"},
+					explicit: {type: "boolean"}
 					attachmentId: {type: "string"}
 					attachmentFilename: {type: "string"}
 					links: {
@@ -60,10 +59,10 @@
 		{target:"track.type", value:"Track"}
 		{target:"track.id", path:"url"}
 		{target:"track.name", path:"label"}
-		{target:"track.exhibit", expression:"{{.ParentURL}}"}
+		{target:"track.album", expression:"{{.ParentURL}}"}
 		{target:"track.position", path:"rank"}
 		{target:"content", path:"data.lyrics"}
-		{target:"exhibit", expression:"{{.ParentURL}}"}
+		{target:"album", expression:"{{.ParentURL}}"}
 		{target:"library", expression:"{{.ParentURL}}/pub/children"}
 	]
 
@@ -83,7 +82,7 @@
 			steps: [
 				{do:"as-modal", steps:[
 					{
-						do:"edit",
+						do:"edit", 
 						form:{
 							type: layout-tabs
 							label: + Add a Song
@@ -111,15 +110,13 @@
 									type: layout-vertical
 									label: Metadata
 									children: [
-										{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}},
+										{type: "select", path: "data.license", label: "License", options:{provider:"bandwagon-album.licenses"}},
 										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."},
 										{type: "text", path: "data.genre", label: "Genre"},
-										{type: "text", path: "data.hubber", label: "Hubber"},
+										{type: "text", path: "data.artist", label: "Artist"},
 										{type: "text", path: "data.composer", label: "Composer"},
 										{type: "text", path: "data.producer", label: "Producer"},
 										{type: "text", path: "data.publisher", label: "Publisher"},
-										{type: "text", path: "data.category", label: "Category"},
-										{type: "text", path: "data.favorites", label: "Favorites"}
 										{type: "text", path: "data.isrc", label: "ISRC"},
 									]
 								}
@@ -166,7 +163,7 @@
 					do:"as-modal",
 					steps:[
 						{
-							do:"edit",
+							do:"edit", 
 							options: ["delete:/{{.StreamID}}/delete"]
 							form:{
 								type: layout-tabs
@@ -195,15 +192,13 @@
 										type: layout-vertical
 										label: Metadata
 										children: [
-											{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}},
+											{type: "select", path: "data.license", label: "License", options:{provider:"bandwagon-album.licenses"}},
 											{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."},
 											{type: "text", path: "data.genre", label: "Genre"},
-											{type: "text", path: "data.hubber", label: "Hubber"},
+											{type: "text", path: "data.artist", label: "Artist"},
 											{type: "text", path: "data.composer", label: "Composer"},
 											{type: "text", path: "data.producer", label: "Producer"},
 											{type: "text", path: "data.publisher", label: "Publisher"},
-											{type: "text", path: "data.category", label: "Category"},
-											{type: "text", path: "data.favorites", label: "Favorites"}
 											{type: "text", path: "data.isrc", label: "ISRC"},
 										]
 									}

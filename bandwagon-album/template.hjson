@@ -1,12 +1,12 @@
 {
-	templateId: blankpage-exhibit
-	templateRole: exhibit
+	templateId: bandwagon-album
+	templateRole: album
 	model: Stream
 	containedBy: ["outbox"]
 	extends: ["base-checkout", "base-intent", "blankpage-common"]
-	icon: exhibit
-	label: Exhibit (Default)
-	description: Contains one or more creations
+	icon: album
+	label: Album (Default)
+	description: Contains one or more songs
 	schema: {
 		type:object
 		properties: {
@@ -19,13 +19,13 @@
 				properties: {
 					checkoutLabel: {type:"string", maxLength:255}
 					license: {type:"string"}
-					thumbFilename: {type:"string", maxLength:255}
+					imageFilename: {type:"string", maxLength:255}
 					tags: {type:"string"}
 					releaseDate:{type:"string", format:"date"}
 					links: {type:"object", wildcard: {type:"string", format:"uri"}}
 					color: {type:"object", properties: {
-						body: {type:"string", format:"color"}
-						page: {type:"string", format:"color"}
+						body: {type:"string", format:"color"},
+						page: {type:"string", format:"color"}, 
 						button: {type:"string", format:"color"}
 					}}
 				}
@@ -46,7 +46,7 @@
 	}
 	roles: {
 		paid: {
-			label: Paid Exhibit
+			label: Paid Album
 			description: Select the products that give special access to paid purchasers and subscribers
 			privileged: true
 		}
@@ -56,9 +56,10 @@
 		javascript: {contentType: "text/javascript"}
 	}
 
-	socialRole: Exhibit
+	socialRole: Album
 	socialRules: [
-
+		
+		{target:"@context", append:"https://funkwhale.audio/ns"}
 		{target:"content", expression:"{{ markdown .Summary }}"}
 		{target:"license", path:"data.license"}
 		{target:"links", forEach:"data.links", rules:[
@@ -67,17 +68,17 @@
 			{target:"href", path:"value"}
 		]}
 		{target:"library", expression:"{{.URL}}/pub/children"}
-		{target:"hubbers", value:[]}
-		{target:"hubbers", append:{type:"Hubber"}}
-		{target:"hubbers.0.id", path:"attributedTo.profileUrl"}
-		{target:"hubbers.0.name", path:"attributedTo.name"}
-		{target:"works", expression:"{{.URL}}/pub/children"}
+		{target:"artists", value:[]}
+		{target:"artists", append:{type:"Artist"}}
+		{target:"artists.0.id", path:"attributedTo.profileUrl"}
+		{target:"artists.0.name", path:"attributedTo.name"}
+		{target:"tracks", expression:"{{.URL}}/pub/children"}
 	]
 
 	tagPaths: ["data.tags"]
 
 	search: {
-		type: "Exhibit"
+		type: "Album"
 		iconUrl:""
 		summary:""
 		text: "{{.Label}} {{.AttributedTo.Name}}"
@@ -93,17 +94,17 @@
 					{
 						do: edit
 						form: {
-							label: + Add an Exhibit
+							label: + Add an Album
 							type:layout-tabs
 							children: [
 								{
 									type:layout-vertical
 									label: General
 									children: [
-										{type:"text", path:"label", label:"Exhibit Name"}
-										{type:"select", path:"data.license", label:"License", options:{required:true, provider:"blankpage-exhibit.licenses"}}
+										{type:"text", path:"label", label:"Album Name"}
+										{type:"select", path:"data.license", label:"License", options:{required:true, provider:"bandwagon-album.licenses"}}
 										{type:"date", path:"data.releaseDate", label:"Release Date"}
-										{type:"upload", path:"iconUrl", label:"Preview Image", options:{accept:"image/*", filename:"data.thumbFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpeg", "png", "jpg", "gif"]}}}
+										{type:"upload", path:"iconUrl", label:"Album Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
 										{type:"toggle", path:"isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured?"}}
 									]
 								}
@@ -111,7 +112,7 @@
 									type:layout-vertical
 									label: Metadata
 									children: [
-										{type:"textarea", path:"summary", label:"Sidebar Notes", description:"Notes appear on the side of the exhibit page. Markdown is allowed.", options:{rows:8, showLimit:true}}
+										{type:"textarea", path:"summary", label:"Sidebar Notes", description:"Notes appear on the side of the album page. Markdown is allowed.", options:{rows:8, showLimit:true}}
 										{type:"textarea", path:"data.tags", label:"Tags", description:"Enter #Hashtags separated by spaces."}
 									]
 								}
@@ -145,20 +146,20 @@
 						}
 					}
 				]}
-				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200, types:["webp", "jpeg", "png", "jpg", "gif"]}}
+				{do:"upload-attachments", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
 				{do:"process-tags", paths:"data.tags"}
 				{do:"save"}
 				{do:"forward-to", url: "/{{.StreamID}}"}
 			]
 		}
-
+		
 		view: {
 			roles: ["author"]
 			stateRoles: {
 				published: ["anonymous"]
 			}
 			steps:[
-				{do: "view-html", file:"exhibit"}
+				{do: "view-html"}
 			]
 		}
 
@@ -170,17 +171,17 @@
 						do: edit
 						options: ["delete:/{{.StreamID}}/delete"]
 						form: {
-							label: Edit Exhibit
+							label: Edit Album
 							type:layout-tabs
 							children: [
 								{
 									type:layout-vertical
 									label: General
 									children: [
-										{type:"text", path:"label", label:"Exhibit Name"}
-										{type:"select", path:"data.license", label:"License", options:{required:true, provider:"blankpage-exhibit.licenses"}}
+										{type:"text", path:"label", label:"Album Name"}
+										{type:"select", path:"data.license", label:"License", options:{required:true, provider:"bandwagon-album.licenses"}}
 										{type:"date", path:"data.releaseDate", label:"Release Date"}
-										{type:"upload", path:"iconUrl", label:"Preview Image", options:{accept:"image/*", filename:"data.thumbFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpg", "jpeg", "png", "gif"]}}}
+										{type:"upload", path:"iconUrl", label:"Album Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
 										{type:"toggle", path:"isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured?"}}
 									]
 								}
@@ -188,7 +189,7 @@
 									type:layout-vertical
 									label: Metadata
 									children: [
-										{type:"textarea", path:"summary", label:"Sidebar Notes", description:"Notes appear on the side of the exhibit page. Markdown is allowed.", options:{rows:8, showLimit:true}}
+										{type:"textarea", path:"summary", label:"Sidebar Notes", description:"Notes appear on the side of the album page. Markdown is allowed.", options:{rows:8, showLimit:true}}
 										{type:"textarea", path:"data.tags", label:"Tags", description:"Enter #Hashtags separated by spaces"}
 									]
 								}
@@ -218,6 +219,13 @@
 										{type:"colorpicker", path:"data.color.button", label:"Links and Buttons"}
 									]
 								}
+								{
+									type:"layout-vertical"
+									label:"Distribution"
+									children:[
+										{type:"multiselect", path:"syndication", label:"Distribute to these streaming services", description:"These services will be notified when this album is published.", options:{provider:"syndication-targets"}}
+									]
+								}
 							]
 						}
 					}
@@ -226,7 +234,7 @@
 				{do:"process-tags", paths:"data.tags"}
 				{do:"search-index"}
 				
-				{do:"if", condition: "{{.IsPublished}}",
+				{do:"if", condition: "{{.IsPublished}}", 
 					then: [
 						{do:"save-and-publish"}
 					], 
@@ -240,7 +248,7 @@
 
 		image: {
 			steps:[
-				{do:"view-attachment", category:"image", format:["webp", "jpeg", "jpg", "gif"], width:800, height:800}
+				{do:"view-attachment", category:"image", format:["webp", "jpeg", "gif"], width:800, height:800}
 			]
 		}
 
@@ -262,30 +270,6 @@
 			]
 		}
 
-		add-creation: {
-			roles: ["author"]
-			steps: [
-				{
-					do: add-stream
-					style: inline
-					location: child
-					title: + Add a Creation
-					type:blankpage-creation
-					with-data:{
-						"data.hubber":"{{.AttributedTo.Name}}"
-						"data.tags":"{{.Data `tags`}}"
-						"data.license": "{{.Data `license`}}"
-					}
-				}
-//				{do:"set-header", name:"Hx-Retarget", value:"main"}
-//				{do:"set-header", name:"Hx-Reswap", value:"innerHTML"}
-//				{do:"set-header", name:"Hx-Push-Url", value:"false"}
-//				{do:"add-event", event:"creationAdded"}
-//				{do:"remove-event", event:"refreshPage"}
-//				{do:"view-html", method:"post", file:"upload"}
-			]
-		}
-
 		add-song: {
 			roles: ["author"]
 			steps: [
@@ -294,9 +278,9 @@
 					style: inline
 					location: child
 					title: + Add a Song
-					type:blankpage-sound
+					type:bandwagon-song
 					with-data:{
-						"data.hubber":"{{.AttributedTo.Name}}"
+						"data.artist":"{{.AttributedTo.Name}}"
 						"data.composer":"{{.AttributedTo.Name}}"
 						"data.tags":"{{.Data `tags`}}"
 						"data.license": "{{.Data `license`}}"
@@ -311,31 +295,7 @@
 			]
 		}
 
-		add-writing: {
-			roles: ["author"]
-			steps: [
-				{
-					do: add-stream
-					style: inline
-					location: child
-					title: + Add Literature
-					type:blankpage-writing
-					with-data:{
-						"data.hubber":"{{.AttributedTo.Name}}"
-						"data.tags":"{{.Data `tags`}}"
-						"data.license": "{{.Data `license`}}"
-					}
-				}
-			//	{do:"set-header", name:"Hx-Retarget", value:"main"}
-			//	{do:"set-header", name:"Hx-Reswap", value:"innerHTML"}
-			//	{do:"set-header", name:"Hx-Push-Url", value:"false"}
-			//	{do:"add-event", event:"writingAdded"}
-				{do:"remove-event", event:"refreshPage"}
-			//	{do:"view-html", method:"post", file:"view"}
-			]
-		}
-
-		sort-works: {
+		sort-tracks: {
 			roles: ["author"]
 			steps: [
 				{do:"sort", model:"Stream", keys:"_id", values:"rank"}
@@ -351,12 +311,60 @@
 			]
 		}
 
-		children: {
-			roles: ["anonymous"]
+		upload: {
+			roles: ["author"]
 			steps: [
-				{do:"view-html", file:"children"}
+				{do:"as-modal", steps:[
+					{do:"view-html"}
+					{do:"edit", form:{
+						type:"layout-vertical"
+						children:[
+							{type:"text", path:"attachmentLabel", label:"Label"}
+							{type:"textarea", path:"attachmentDescription", label:"Description", description:"A few words to show underneath the filename."}
+							{type:"upload", path:"file", label:"Attachment"}
+						]
+					}, options:["submit-label:Upload Attachment"]}
+					{do:"upload-attachments", category:"other", maximum:8, fieldname:"file", label-fieldname:"attachmentLabel", description-fieldname:"attachmentDescription"}
+					{do:"refresh-page"}
+				]}
 			]
-		},
+		}
+
+		edit-upload: {
+			roles: ["author"]
+			steps: [
+				{do:"as-modal", steps:[
+					{do:"with-attachment", steps:[
+						{
+							do:"edit", 
+							options:[
+								"endpoint:/{{.ObjectID}}/edit-upload?attachmentId={{.AttachmentID}}", 
+								"delete:/{{.ObjectID}}/delete-upload?attachmentId={{.AttachmentID}}"
+							]
+							form:{
+								type:"layout-vertical"
+								label:"Edit Attachment",
+								children:[
+									{type:"text", path:"label", label:"Label"}
+									{type:"textarea", path:"description", label:"Description"}
+								]
+							}
+						}
+						{do:"save"}
+						{do:"refresh-page"}
+					]}
+				]}
+			]
+		}
+
+		delete-upload: {
+			roles: ["author"]
+			steps: [
+				{do:"as-confirmation", title:"Delete this Attachment?", message:"Are you sure you want to delete this attachment? There is NO UNDO.", submit:"DELETE"}
+				{do:"delete-attachments"}
+				{do:"refresh-page"}
+			]
+		}
 
 		publish: {
 			roles: ["author"]
@@ -368,14 +376,15 @@
 							do: edit
 							form: {
 								type: layout-vertical
-								label: Re-Publish this Exhibit?
-								description: "If you've made changes to this exhibit, you can send updates to all distribution channels.",
+								label: Re-Publish this Album?
+								description: "If you've made changes to this album, you can send updates to all distribution channels.",
 								children:[
-									{type:"select", path:"data.license", label:"License", options:{required:true, provider:"blankpage-exhibit.licenses"}}
+									{type:"select", path:"data.license", label:"License", options:{required:true, provider:"bandwagon-album.licenses"}}
 									{type:"select", path:"isFeatured", label:"Feature on Home Page", options:{enum:[{value:"false", label:"NO. Do not show on my home page"}, {value:"true", label:"YES. Show on my home page"}]}}
+									{type:"multiselect", path:"syndication", label:"Distribute to Streaming Stations", description:"Share this album with indie streaming services", options:{provider:"syndication-targets"}}
 								]
 							},
-							options:["submit-label:Publish Exhibit"]
+							options:["submit-label:Publish Album"]
 						}
 					],
 					else:[
@@ -383,40 +392,42 @@
 							do: edit
 							form: {
 								type: layout-vertical
-								label: Publish this Exhibit?
+								label: Publish this Album?
 								children:[
-									{type:"select", path:"data.license", label:"License", options:{required:true, provider:"blankpage-exhibit.licenses"}}
+									{type:"select", path:"data.license", label:"License", options:{required:true, provider:"bandwagon-album.licenses"}}
 									{type:"select", path:"isFeatured", label:"Feature on Home Page", options:{enum:[{value:"false", label:"NO. Do not show on my home page"}, {value:"true", label:"YES. Show on my home page"}]}}
+									{type:"multiselect", path:"syndication", label:"Distribute to Streaming Stations", description:"Share this album with indie streaming services.", options:{provider:"syndication-targets"}}
 								]
 							},
-							options:["submit-label:Publish Exhibit"]
+							options:["submit-label:Publish Album"]
 						}
 					]}
 					{do:"set-state", state:"published"}
 					{do:"save-and-publish", outbox:"true", republish:true}
 					{do:"search-index"}
-					{do:"make-archive", token:"FULL-EXHIBIT", depth:1, json:true, attachments:true, metadata: [
+					{do:"make-archive", token:"FULL-ALBUM", depth:1, json:true, attachments:true, metadata: [
 					
-						// metadata for exhibit attachments
+						// metadata for album attachments
 						[],
 						
-						// metadata for creation attachments
+						// metadata for song attachments
 						[
 							{target:"cover", path:"parent.iconUrl"},
 							{target:"comment", path:"parent.attributedTo.profileUrl"}
 							{target:"title", path:"stream.label"},
 							{target:"author", path:"parent.attributedTo.name"}
-							{target:"hubber", path:"parent.attributedTo.name"}
-							{target:"exhibit", path:"parent.label"},
+							{target:"artist", path:"parent.attributedTo.name"}
+							{target:"album_artist", path:"parent.attributedTo.name"},
+							{target:"album", path:"parent.label"},
 							{target:"composer", path:"stream.data.composer"},
 							{target:"producer", path:"stream.data.producer"},
 							{target:"publisher", path:"stream.data.publisher"},
 							{target:"year", path:"parent.data.year"},
-							{target:"work", path:"stream.rank"},
+							{target:"track", path:"stream.rank"},
 							{target:"genre", path:"stream.data.genre"}
 							{target:"copyright", path:"parent.data.license"},
 							{target:"lyrics", path:"stream.data.lyrics"},
-							{target:"ISRC", path:"stream.data.isrc"},
+							{target:"TISRC", path:"stream.data.isrc"},
 						]
 					]}
 					{do:"refresh-page"}
@@ -431,7 +442,7 @@
 					{do:"view-html"}
 					{do:"unpublish", state:"default", outbox:"true"}
 					{do:"search-index"}
-					{do:"delete-archive", token:"FULL-EXHIBIT"}
+					{do:"delete-archive", token:"FULL-ALBUM"}
 					{do:"refresh-page"}
 				]}
 			]
@@ -460,64 +471,26 @@
 			]
 		}
 
-		add-creation-new: {
-			roles: ["author"]
-			steps: [{
-						do:"edit",
+		upload-paid-attachment: {
+			roles: ["author", "editor"]
+			steps: [
+				{do:"as-modal", steps:[
+					{
+						do:"edit"
 						form:{
-							type: layout-tabs
-							label: "+ Add a Creation"
-							children: [
-								{
-									type: layout-vertical
-									label: General
-									children: [
-										{type: "text",   path: "label", label: "Creation Title"}
-										{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*",  rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}}
-										{type: "upload", path: "iconUrl", label:"Preview Thumbnail", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpg", "jpeg", "png", "gif"]}}}
-										{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Description
-									children: [
-										{type: "textarea", path: "data.summary", description:"Enter summary or creation description.  Displays on this creation's detail page.", options:{rows: 16}}
-										{type: "toggle", path: "data.mature", options:{true-text:"Mature Content", false-text:"Mature Content"}}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Metadata
-									children: [
-										{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}}
-										{type: "select", path: "data.category", label: "Category", options:{provider:"blankpage-exhibit.categories"}}
-										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."}
-										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Tags separated by spaces."}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Links
-									children: [
-										{type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
-										{type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
-										{type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
-										{type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
-										{type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
-										{type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
-										{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
-									]
-								}
+							type:"layout-vertical"
+							label:"Upload an Exclusive File"
+							children:[
+								{type:"text", path:"attachmentLabel", label:"Label"}
+								{type:"textarea", path:"attachmentDescription", label:"Description", description:"A few words to show underneath the filename."}
+								{type:"upload", path:"file", label:"Attachment"}
 							]
-						}
+						}, 
+						options:["submit-label:Upload Exclusive File"]
 					}
-					{do:"upload-attachments", category:"Artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
-					{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200}, rules:{types:["webp", "jpeg", "png", "jpg", "gif"]}}
-					{do:"process-tags", paths:"data.tags"}
-					{do:"save-and-publish", outbox:false}
-					{do:"search-index"}
+					{do:"upload-attachments", category:"paid", maximum:6, fieldname:"file", label-fieldname:"attachmentLabel", description-fieldname:"attachmentDescription"}
 					{do:"refresh-page"}
+				]}
 			]
 		}
 
@@ -560,25 +533,25 @@
 		zip9348103752: {
 			roles:["anonymous"]
 			steps: [
-				{do:"get-archive", token:"FULL-EXHIBIT", depth:1, json:true, attachments:true, metadata: [
+				{do:"get-archive", token:"FULL-ALBUM", depth:1, json:true, attachments:true, metadata: [
 					
-					// metadata for exhibit attachments
+					// metadata for album attachments
 					[],
 					
-					// metadata for creation attachments
+					// metadata for song attachments
 					[
 						{target:"cover", path:"parent.iconUrl"},
 						{target:"comment", path:"parent.attributedTo.profileUrl"}
 						{target:"title", path:"stream.label"},
 						{target:"author", path:"parent.attributedTo.name"}
-						{target:"hubber", path:"parent.attributedTo.name"}
-						{target:"exhibit_hubber", path:"parent.attributedTo.name"},
-						{target:"exhibit", path:"parent.label"},
+						{target:"artist", path:"parent.attributedTo.name"}
+						{target:"album_artist", path:"parent.attributedTo.name"},
+						{target:"album", path:"parent.label"},
 						{target:"composer", path:"stream.data.composer"},
 						{target:"producer", path:"stream.data.producer"},
 						{target:"publisher", path:"stream.data.publisher"},
 						{target:"year", path:"parent.data.year"},
-						{target:"work", path:"stream.rank"},
+						{target:"track", path:"stream.rank"},
 						{target:"genre", path:"stream.data.genre"}
 						{target:"copyright", path:"parent.data.license"},
 						{target:"lyrics", path:"stream.data.lyrics"},

@@ -9,6 +9,9 @@
 	{{- $exhibits := .Outbox.Featured.Where "templateId" "blankpage-exhibit" -}}
 	{{- $exhibits := $exhibits.By "data.releaseDate" -}}
 	{{- $exhibits := $exhibits.Reverse.Slice -}}
+	{{- $albums := .Outbox.Featured.Where "templateId" "bandwagon-album" -}}
+	{{- $albums := $albums.By "data.releaseDate" -}}
+	{{- $albums := $albums.Reverse.Slice -}}
 
 	<!-- Page content -->
 	<div class="framed page h-card padding-none"
@@ -47,6 +50,13 @@
 
 		{{- if not .IsPublic -}}
 			{{- if $exhibits.NotEmpty -}}
+				<div hx-get="/@{{.UserID}}/publish" class="clickable alert-green margin-none" role="button">
+					{{icon "check-circle"}}
+					Your profile IS READY TO PUBLISH on the social web.
+					<span class="text-underline">Click here to publish it now</span>
+				</div>
+			{{- end -}}
+			{{- if $albums.NotEmpty -}}
 				<div hx-get="/@{{.UserID}}/publish" class="clickable alert-green margin-none" role="button">
 					{{icon "check-circle"}}
 					Your profile IS READY TO PUBLISH on the social web.
@@ -178,6 +188,80 @@
 								<div class="align-center margin-none margin-top bold link">Next Step:</div>
 								<div class="align-center text-lg margin-none margin-bottom bold link">Add an Exhibit</div>
 								<div class="align-center text-sm text-gray">You can publish your profile after you've uploaded at least one exhibit</div>
+							</div>
+						{{- end -}}
+					</div>
+				{{- end -}}
+
+				<!-- Albums -->
+				{{- if or $albums.NotEmpty $isMyself -}}
+
+					{{- $albumLabel := first (.Data "label-albums") "Bandwagon Albums" -}}
+
+					<div class="margin-bottom pos-relative">
+						<a href="/@{{$username}}/albums" hx-boost="true" aria-label="View All Bandwagon Albums">
+							<span class="text-nocolor text-plain text-xl bold margin-right-sm">{{$albumLabel}}</span>
+							All &rarr;
+						</a>
+
+						{{- if $isMyself -}}
+							<div class="pos-absolute-top-right text-sm">
+								<button hx-get="/@{{.UserID}}/add-album?isFeatured=true" aria-label="Add an Album">
+									{{icon "add"}} Bandwagon Album
+								</button>
+								<button hx-get="/@{{.UserID}}/edit-albums" aria-label="Edit Album Page">
+									Edit
+								</button>
+							</div>
+						{{- end -}}
+
+					</div>
+					<hr class="margin-none">
+
+					{{- if $albums.IsEmpty -}}
+						<div class="text-gray text-sm margin-bottom">
+							Get started by uploading or importing your bandwagon music to your blankpage profile.  Featured Bandwagon Albums appear here.
+						</div>
+					{{- end -}}
+
+					<div class="cols-2-4 padding-vertical margin-bottom-xl">
+						{{- range $albums -}}
+
+							{{- if or .IsPublished $isMyself -}}
+
+								<div class="rounded card hover-trigger hover-swell">
+									<a href="/{{.StreamID}}" hx-boost="true" hx-swap="transition:true" class="text-plain text-nocolor flex-column block">
+
+										<img src="{{.IconURL}}" class="rounded-top square width-100% block object-fit-cover" aria-hidden="true">
+										<div class="padding text-plain">
+											<div class="bold link">{{.Label}}</div>
+											<div class="text-gray">
+												Album
+												{{- $releaseDate := index .Data "releaseDate" -}}
+												{{- if ne nil $releaseDate }}
+													&middot; {{$releaseDate | year }}
+												{{- end -}}
+											</div>
+										</div>
+										{{- if not .IsPublished -}}
+											<div class="pos-absolute-four-corners bg-stripes flex-center"></div>
+										{{- end -}}
+									</a>
+
+									{{- if $isMyself -}}
+										<button hx-get="/{{.StreamID}}/edit" class="hover-show pos-absolute-top-right text-xs">Edit</button>
+									{{- end -}}
+
+								</div>
+							{{- end -}}
+						{{- end -}}
+
+						{{- if $albums.IsEmpty -}}
+							<div hx-get="/@{{.UserID}}/add-album?isFeatured=true" class="hover-swell rounded card flex-column flex-center padding-vertical padding-horizontal" role="button">
+								<div class="align-center margin-none link" style="font-size:64px;" aria-hidden="true">{{icon "cassette"}}</div>
+								<div class="align-center margin-none margin-top bold link">Next Step:</div>
+								<div class="align-center text-lg margin-none margin-bottom bold link">Add a Bandwagon Album</div>
+								<div class="align-center text-sm text-gray">You can publish your profile after you've uploaded at least one exhibit or album</div>
 							</div>
 						{{- end -}}
 					</div>
