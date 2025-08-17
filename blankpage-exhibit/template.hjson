@@ -281,7 +281,7 @@
 //				{do:"set-header", name:"Hx-Reswap", value:"innerHTML"}
 //				{do:"set-header", name:"Hx-Push-Url", value:"false"}
 //				{do:"add-event", event:"creationAdded"}
-				{do:"remove-event", event:"refreshPage"}
+//				{do:"remove-event", event:"refreshPage"}
 //				{do:"view-html", method:"post", file:"upload"}
 			]
 		}

@@ -209,7 +209,7 @@
 			roles: ["author"],
 			steps: [
 				{do:"delete", title:"Delete this Creation?"}
-				{do:"redirect-to", url:"/{{.StreamID}}"}
+				{do:"forward-to", url:"/{{.ParentID}}"}
 			]
 		}
 
