@@ -83,19 +83,21 @@
 				{do: "as-modal", steps: [
 					{do: "view-html", file: "upload"}
 					{do: "set-data", from-form: [
-						data.tags,
-						data.category,
-						data.genre,
-						data.license,
-						data.title,
-						data.summary,
-						data.imageUrl,
-						data.featured,
-						data.mature,
-						data.attachmentId,
-						data.thumbFilename,
-						data.attachmentFilename,
-						data.links
+						"data.tags",
+						"data.category",
+						"data.genre",
+						"data.license",
+						"data.title",
+						"data.summary",
+						"data.imageUrl",
+						"data.featured",
+						"data.mature",
+						"data.attachmentId",
+						"data.thumbFilename",
+						"data.attachmentFilename",
+						"data.links",
+						"iconUrl"
+					]}
 				]}
 				{do:"upload-attachments", category:"Artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
 				{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200}, rules:{types:["webp", "jpeg", "png", "jpg", "gif"]}}
@@ -104,7 +106,7 @@
 				{do:"search-index"}
 				{do:"refresh-page"}
 			]
-		},
+		}
 
 		view: {
 			roles: ["anonymous"]
