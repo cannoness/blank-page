@@ -1,0 +1,10 @@
+{{- $query := .QueryParam "q" -}}
+{{- $escapedQuery := queryEscape $query -}}
+
+<div class="flex-row md:flex-column">
+	<a href="/hubbers?q={{$query}}" hx-boost="true" class="search-navigation turboclick">Artists</a>
+	<a href="/exhibits?q={{$query}}" hx-boost="true" class="search-navigation turboclick">Exhibits</a>
+	<a href="/works" hx-boost="true" class="search-navigation turboclick selected">Pieces</a>
+	<a href="/events?q={{$query}}" hx-boost="true" class="search-navigation turboclick">Calendar</a>
+	<a href="/news/?q={{$query}}" hx-boost="true" class="search-navigation turboclick">News</a>
+</div>

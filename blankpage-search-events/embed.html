@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="/.themes/global/stylesheet?v={{.ETag}}">
+	<link rel="stylesheet" type="text/css" href="/.themes/default/stylesheet?v={{.ETag}}">
+	<style>
+		:root {
+			overscroll-behavior: none;
+		}
+	</style>
+</head>
+
+<body onresize="sendResize()">
+
+	{{- .View "view-results" -}}
+
+	<div class="margin align-right text-xs text-gray">
+		<a href="{{.Host}}/{{.Token}}" class="text-black" target="_top">Calendar by {{.Hostname}}</a>
+	</div>
+
+	<script>
+		"use strict";
+
+		function sendResize() {
+			var message = {
+				"action":"resize",
+				"src": "{{.URL}}",
+				"height": document.body.scrollHeight
+			}
+
+			window.parent.postMessage(message, "*");
+		}
+
+		sendResize();
+	</script>
+
+<script src="/.themes/global/resources/hyperscript/_hyperscript.min.js" defer></script>
+<script src="/.themes/global/hyperscript" type="text/hyperscript"></script>
+
+</body>
+</html>

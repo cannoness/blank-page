@@ -1,4 +1,4 @@
-{{- $exhibits := (.Outbox.Where "templateId" "bandwagon-exhibit").ByRankAlt.Slice -}}
+{{- $exhibits := (.Outbox.Where "templateId" "blankpage-exhibit").ByRankAlt.Slice -}}
 {{- $isMyself := .IsMyself -}}
 {{- $label := first (.Data "label-exhibits") "Exhibits" -}}
 {{- $description := .Data "description-exhibits" -}}

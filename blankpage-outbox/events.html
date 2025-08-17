@@ -1,5 +1,5 @@
 {{- $events := .Outbox.ByStartDate -}}
-{{- $events := $events.Where "templateId" "bandwagon-event" -}}
+{{- $events := $events.Where "templateId" "blankpage-event" -}}
 {{- $showCurrent := ne "past" (.QueryParam "view") -}}
 
 {{- if $showCurrent -}}

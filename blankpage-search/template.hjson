@@ -19,7 +19,7 @@
 					content: {type:"string"}
 				}
 			}
-		}    
+		}
 	}
 	states: {
 		default: {
@@ -37,7 +37,7 @@
 			content-type:text/hyperscript
 		}
 	}
-	
+
 	actions: {
 
 		create: {

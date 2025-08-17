@@ -1,11 +1,11 @@
 {
-	templateId: blankpage-search-users
+	templateId: blankpage-search-hubbers
 	templateRole: search
 	extends: ["blankpage-search"]
 	model: Stream
 	containedBy: ["top"]
 	icon: home
-	label: OneBlankPage User Search
+	label: Blankpage Hubber Search
 	description: Search Engine for Users
 	schema: {
 		type:object

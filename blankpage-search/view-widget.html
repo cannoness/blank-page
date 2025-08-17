@@ -1,8 +1,8 @@
 {{- $query := .QueryParam "q" | trim -}}
 {{- $placeholder := .Data "searchText" -}}
 
-<script src="/.templates/bandwagon-search/javascript"></script>
-<script type="text/hyperscript" src="/.templates/bandwagon-search/hyperscript"></script>
+<script src="/.templates/blankpage-search/javascript"></script>
+<script type="text/hyperscript" src="/.templates/blankpage-search/hyperscript"></script>
 
 <div class="search-container pos-relative">
 	<form id="search-form" hx-get="/{{.Token}}" hx-indicator="#search-widget">
@@ -23,5 +23,5 @@
 		<div id="search-suggestions" class="pop-up list-box" script="install Popup install Listbox" style="visibility:hidden;"></div>
 	</form>
 
-<!--	{{- template "search-related" . -}}-->
+	{{- template "search-related" . -}}
 </div>
