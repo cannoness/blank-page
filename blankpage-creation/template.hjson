@@ -83,6 +83,7 @@
 				{do: "as-modal", steps: [
 					{do: "view-html", file: "upload"}
 					{do: "set-data", from-form: [
+						"label",
 						"data.tags",
 						"data.category",
 						"data.genre",
