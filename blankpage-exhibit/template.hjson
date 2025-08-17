@@ -275,15 +275,14 @@
 						"data.hubber":"{{.AttributedTo.Name}}"
 						"data.tags":"{{.Data `tags`}}"
 						"data.license": "{{.Data `license`}}"
-						"data.exhibit":"{{.StreamID}}"
 					}
 				}
-			//	{do:"set-header", name:"Hx-Retarget", value:"main"}
-			//	{do:"set-header", name:"Hx-Reswap", value:"innerHTML"}
-			//	{do:"set-header", name:"Hx-Push-Url", value:"false"}
-			//	{do:"add-event", event:"creationAdded"}
-				{do:"remove-event", event:"refreshPage"}
-			//	{do:"view-html", method:"post", file:"view"}
+//				{do:"set-header", name:"Hx-Retarget", value:"main"}
+//				{do:"set-header", name:"Hx-Reswap", value:"innerHTML"}
+//				{do:"set-header", name:"Hx-Push-Url", value:"false"}
+//				{do:"add-event", event:"creationAdded"}
+//				{do:"remove-event", event:"refreshPage"}
+//				{do:"view-html", method:"post", file:"upload"}
 			]
 		}
 
@@ -461,18 +460,9 @@
 			]
 		}
 
-		upload: {
-			roles: ["author"],
-			steps: [
-				{do: "view-html"}
-			]
-		}
-
-		add-new-creation: {
+		add-creation-new: {
 			roles: ["author"]
-			steps: [
-				{do:"with-upload", steps:[
-					{
+			steps: [{
 						do:"edit",
 						form:{
 							type: layout-tabs
@@ -522,16 +512,15 @@
 							]
 						}
 					}
-
-				]}
-				{do:"upload-attachments", category:"Artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
-				{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200}, rules:{types:["webp", "jpeg", "png", "jpg", "gif"]}}
-   				{do:"process-tags", paths:"data.tags"}
-				{do:"save-and-publish", outbox:false}
-				{do:"search-index"}
-				{do:"refresh-page"}
+					{do:"upload-attachments", category:"Artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
+					{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200}, rules:{types:["webp", "jpeg", "png", "jpg", "gif"]}}
+					{do:"process-tags", paths:"data.tags"}
+					{do:"save-and-publish", outbox:false}
+					{do:"search-index"}
+					{do:"refresh-page"}
 			]
 		}
+
 		edit-paid-attachment: {
 			roles: ["author", "editor"]
 			steps: [

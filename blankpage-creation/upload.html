@@ -1,6 +1,5 @@
 <div data-hx-target="this" data-hx-swap="outerHTML" data-hx-push-url="false">
-    @{{ .StreamID }}
-<form method="post" hx-post="/@{{.StreamID}}/add-new-creation" hx-swap="none" hx-push-url="false" hx-encoding="multipart/form-data" hx-trigger="submit" data-script="init send checkFormRules(changed:me as Values)">
+<form method="post" hx-post="{{.URL}}" hx-swap="none" hx-push-url="false" hx-encoding="multipart/form-data" hx-trigger="submit" data-script="init send checkFormRules(changed:me as Values)">
     <div class="layout-title"> + Add a Creation</div>
     <div class="tabs" data-script="install TabContainer">
         <div role="tablist">
@@ -13,9 +12,9 @@
             <div class="layout layout-vertical">
                 <div class="layout-elements">
                     <div class="layout-element layout-vertical-element">
-                        <label for="label.text" aria-hidden="true">Creation Title</label>
+                        <label for="title.text" aria-hidden="true">Creation Title</label>
 
-                        <input name="label" id="label.text" aria-label="Creation Title" tabIndex="0" type="text">
+                        <input name="title" id="title.text" aria-label="Creation Title" tabIndex="0" type="text">
                     </div>
                     <div class="layout-element layout-vertical-element">
                         <label for="data.attachmentId.upload" aria-hidden="true">Artwork File</label>
@@ -139,4 +138,10 @@
         </div>
     </div>
 </form>
-</div>
+</div>	<div
+		hx-get="/{{.StreamID}}/add-creation"
+		hx-trigger="refreshPage from:window"
+		hx-target="#main"
+		hx-swap="innerHTML"
+		hx-push-url="false">
+	</div>

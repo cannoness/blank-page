@@ -33,7 +33,7 @@
 					featured: {type: "boolean"}
 					mature: {type: "boolean"}
 					favorites: {type: "string"}
-					exhibit: {type: "string"}
+					exhibit: {type: "string", default: "{{.StreamID}}"}
 					attachmentId: {type: "string", format:"url"}
 					thumbFilename: {type: "string"}
 					attachmentFilename: {type: "string"}
@@ -80,17 +80,32 @@
 		create: {
 			roles: ["author"]
 			steps: [
-				{do:"as-modal", steps:[
+				{do: "as-modal", steps: [
 					{do: "view-html", file: "upload"}
+					{do: "set-data", from-form: [
+						data.tags,
+						data.category,
+						data.genre,
+						data.license,
+						data.title,
+						data.summary,
+						data.imageUrl,
+						data.featured,
+						data.mature,
+						data.attachmentId,
+						data.thumbFilename,
+						data.attachmentFilename,
+						data.links
 				]}
 				{do:"upload-attachments", category:"Artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
 				{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200}, rules:{types:["webp", "jpeg", "png", "jpg", "gif"]}}
-   				{do:"process-tags", paths:"data.tags"}
+				{do:"process-tags", paths:"data.tags"}
 				{do:"save-and-publish", outbox:false}
 				{do:"search-index"}
 				{do:"refresh-page"}
 			]
-		}
+		},
+
 		view: {
 			roles: ["anonymous"]
 			steps: [
@@ -99,7 +114,7 @@
 		}
 
 		upload: {
-			roles: ["author"],
+			roles: ["author"]
 			steps: [
 				{do: "view-html"}
 			]
@@ -113,7 +128,7 @@
 					steps:[
 						{
 							do:"edit",
-							options: ["delete:/{{.StreamID}}/delete"],
+							options: ["delete:/{{.StreamID}}/delete"]
 							form:{
 								type: layout-tabs
 								label: "Edit Creation"
@@ -240,7 +255,6 @@
 			steps:[
 				{do:"view-attachment", category:"Artwork", format:["webp", "jpeg", "gif", "jpg", "png"]}
 			]
-		},
-
+		}
 	}
 }
