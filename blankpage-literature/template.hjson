@@ -1,270 +1,253 @@
 {
 	templateId: blankpage-writing
-	templateRole: writing
+	templateRole: Note
 	model: Stream
 	label: Writing
-	extends: ["base-intent", "blankpage-common"]
+	extends: ["base-intent"]
 	containedBy: ["exhibit"]
 
+	schema: {
+		type:object
+        properties: {
+			title: {type:"string"}
+			summary: {type:"string"}
+			content: {type:"object", properties:{
+				"type": {type:"string"}
+				"raw": {type:"string"}
+				"html": {type:"string"}
+			}}
+			data: {type:"object", properties:{
+				linkText: {type:"string"}
+				bannerUrl: {type:"string", format:"url"}
+			}}
+		}
+	}
+
+	roles: {
+		viewer: {
+			label: Viewer
+			description: Can view this news item when it is published.
+			privileged: true
+		}
+	}
+
 	states: {
+		default: {
+			label: Unpublished,
+			description: This item can only be seen by hubbers
+		}
 		published: {
 			label: Published,
-			description: This item has been published and is visible on the website
+			description: This item is visible to everyone
 		}
 	}
 
-	schema: {
-		type: object
-		properties: {
-			label: {type: "string", required: true}
-			thumbUrl: {type:"string", format:"url"}
-			data: {
-				type: object
-				properties: {
-					tags: {type:"string"}
-					length: {type: "string"}
-					genre: {type: "string"}
-					hubber: {type: "string"}
-					publisher: {type: "string"}
-					license: {type: "string"}
-					contents: {type: "string"}
-					summary: {type: "string"}
-					featured: {type: "boolean"}
-					mature: {type: "boolean"}
-					favorites: {type: "string"},
-					attachmentId: {type: "string"}
-					attachmentFilename: {type: "string"}
-					links: {
-						type: object
-						wildcard:{type: "string", format:"url"}
-					}
-				}
-			}
-		}
-	}
-
-	socialRole: Literature
+	socialRole: Article
 	socialRules: [
-		{target:"type", value:"Literature"}
-		{target:"attributedTo.id", path:"attributedTo.profileUrl"},
-		{target:"attributedTo.name", path:"attributedTo.name"},
-		{target:"links", forEach:"data.links", rules:[
-			{target:"label", path:"key"}
-			{target:"rel", value:"alternate"}
-			{target:"href", path:"value"}
-		]}
-		{target:"work.type", value:"work"}
-		{target:"work.id", path:"url"}
-		{target:"work.name", path:"label"}
-		{target:"work.exhibit", expression:"{{.ParentURL}}"}
-		{target:"work.position", path:"rank"}
-		{target:"content", path:"data.summary"}
-		{target:"exhibit", expression:"{{.ParentURL}}"}
-		{target:"library", expression:"{{.ParentURL}}/pub/children"}
+		{target:"content", expression:"{{.SummaryOrContent}}"}
 	]
 
 	search: {
-		type: Literature
-		thumbUrl:"{{first .IconURL (join `/` .ParentID.Hex `/icon`)}}"
+		type:Article
+		iconUrl:""
 		summary:""
-		text: "{{.Label}} {{.AttributedTo.Name}} {{index .Data `summary`}}"
-		tags: "LIC:{{index .Data `license`}}"
+		text: "{{.Label}} {{.AttributedTo.Name}} {{.Summary}} {{.Content.HTML}}"
 	}
 
-	tagPaths: ["data.tags"]
+	tagPaths: ["summary", "content.html"]
 
 	actions: {
+
+		togglebutton: {
+			roles:["author"]
+			steps: [
+				{do:"edit", form:{
+					type:layout-vertical
+					label:"Test Form"
+					children:[
+						{type:"check-button", label:"Share with Everyone", description:"This is a cool test description", path:"test", options:{icon:"globe", value:"PUBLIC", script:"on change if my.checked tell .circles set your.checked to false"}}
+						{type:"check-button-group", label:"Circles", path:"test", options:{provider:"circles", script:"on change if my.checked then set #checkbutton-test-PUBLIC.checked to false", class:"circles"}}
+					]
+				}}
+			]
+		}
+
 		create: {
 			roles: ["author"]
 			steps: [
-				{do:"as-modal", steps:[
+				{do:"as-modal", options:["class:large"], steps:[
+					{do:"set-data", from-url:["isFeatured"]}
 					{
-						do:"edit",
-						form:{
-							type: layout-tabs
-							label: + Add a Literature
+						do:edit
+						form: {
+							type:layout-tabs
+							label:"+ Add News"
 							children: [
 								{
-									type: layout-vertical
-									label: General
+									type:layout-vertical
+									label: News
 									children: [
-										{type: "text",   path: "label", label: "Literature Title"},
-										{type: "upload", path: "data.attachmentId", label: "Literature File", options:{filename:"data.attachmentFilename", accept:"text/*"}},
-										{type: "upload", path: "thumbUrl", label:"Cover Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
-										{type: "text",   path: "data.length", label: "Length"},
-										{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
+										{type:"text", path: "label", label: "Title"}
+										{type:"textarea", path: "summary", label: "Summary", description:"Shows on list pages.", options:{rows:5}}
+										{type:"text", path:"data.linkText", label:"Link Text", description:"Text for the link to the full article.", options:{placeholder:"Read More"}}
+										{type:"toggle", path: "isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured"}}
 									]
 								}
 								{
-									type: layout-vertical
-									label: Description
-									children: [
-										{type: "textarea", path: "data.summary", description:"Enter summary or writing description.  Displays on this writing's detail page.", options:{rows: 16}}
-										{type: "toggle", path: "data.explicit", options:{true-text:"Explicit Lyrics", false-text:"Explicit Lyrics"}}
+									type:layout-vertical
+									label:"Content"
+									children:[
+										{type:"textarea", path: "content.raw", label: "Content", description:"Shows on news article page only. Markdown is okay.", options:{rows:16}}
 									]
 								}
 								{
-									type: layout-vertical
-									label: Metadata
-									children: [
-										{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}},
-										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."},
-										{type: "text", path: "data.genre", label: "Genre"},
-										{type: "text", path: "data.hubber", label: "Hubber"},
-										{type: "text", path: "data.publisher", label: "Publisher"}
-										{type: "text", path: "data.category", label: "Category"},
-										{type: "text", path: "data.favorites", label: "Favorites"}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Links
-									children: [
-                                        {type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
-										{type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
-										{type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
-										{type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
-										{type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
-										{type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
-										{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
+									type:layout-vertical
+									label:"Uploads"
+									children:[
+										{type:"upload", path:"iconUrl", label:"Card Image", description:"Shows on event cards.  Square recommended.", options:{accept:"image/*", delete:"/{{.StreamID}}/delete-icon"}}
+										{type:"upload", path:"data.bannerUrl", label:"Banner Image", description:"Shows on top of event page. Optional.", options:{accept:"image/*", delete:"/{{.StreamID}}/delete-image"}}
 									]
 								}
 							]
 						}
 					}
+
+					{do:"upload-attachments", category:"icon", fieldname:"iconUrl", download-path:"iconUrl", rules:{width:800, height:800, types:["webp"]}}
+					{do:"upload-attachments", category:"image", fieldname:"data.bannerUrl", download-path:"data.bannerUrl", rules:{}}
+
+					{do:"edit-content", field:"content.raw", format:"MARKDOWN"}
+					{do:"process-tags", paths:"data.tags"}
+					{do:"save"}
+					{do:"search-index"}
+					{do:"forward-to", url:"/{{.StreamID}}"}
 				]}
-				{do:"upload-attachments", category:"image", fieldname:"thumbUrl", download-path:"thumbUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
-				{do:"upload-attachments", action:"replace", category:"Literature", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"text/*", maximum:1}
-				{do:"process-tags", paths:"data.tags"}
-				{do:"save-and-publish", outbox:false}
-				{do:"search-index"}
-				{do:"refresh-page"}
 			]
 		}
-		view: {
-			roles: ["anonymous"]
-			steps: [
-				{do:"view-html"}
-			]
-		}
+
 		edit: {
 			roles: ["author"]
 			steps: [
-				{
-					do:"as-modal",
-					steps:[
-						{
-							do:"edit",
-							options: ["delete:/{{.StreamID}}/delete"]
-							form:{
-								type: layout-tabs
-								label: Edit Literature
-								children: [
-									{
-										type: layout-vertical
-										label: General
-										children: [
-											{type: "text",   path: "label", label: "Literature Title"},
-											{type: "upload", path: "data.attachmentId", label: "Literature File", options:{filename:"data.attachmentFilename", accept:"text/*"}},
-											{type: "upload", path: "thumbUrl", label:"Cover Art", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:800, height:800, types:["webp"]}}}
-											{type: "text",   path: "data.length", label: "Length"},
-											{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
-										]
-									}
-									{
-										type: layout-vertical
-										label: Description
-										children: [
-											{type: "textarea", path: "data.summary", description:"Enter summary or writing description.  Displays on this writing's detail page.", options:{rows: 16}}
-											{type: "toggle", path: "data.explicit", options:{true-text:"Explicit Lyrics", false-text:"Explicit Lyrics"}}
-										]
-									}
-									{
-										type: layout-vertical
-										label: Metadata
-										children: [
-											{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}},
-											{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."},
-											{type: "text", path: "data.genre", label: "Genre"},
-											{type: "text", path: "data.hubber", label: "Hubber"},
-											{type: "text", path: "data.publisher", label: "Publisher"}
-											{type: "text", path: "data.category", label: "Category"},
-											{type: "text", path: "data.favorites", label: "Favorites"}
-										]
-									}
-									{
-										type: layout-vertical
-										label: Links
-										children: [
-											{type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
-											{type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
-											{type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
-											{type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
-											{type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
-											{type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
-											{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
-										]
-									}
-								]
-							}
+				{do:"as-modal", options:["class:large"], steps:[
+					{do:"view-html"}
+					{
+						do:"edit"
+						options: ["delete:/{{.StreamID}}/delete"]
+						form: {
+							type:layout-tabs
+							children: [
+								{
+									type:layout-vertical
+									label: News
+									children: [
+										{type:"text", path: "label", label: "Title"}
+										{type:"textarea", path: "summary", label: "Summary", description:"Shows on list pages.", options:{rows:5}}
+										{type:"text", path:"data.linkText", label:"Link Text", description:"Text for the link to the full article.", options:{placeholder:"Read More"}}
+										{type:"toggle", path: "isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured"}}
+									]
+								}
+								{
+									type:layout-vertical
+									label:"Content"
+									children:[
+										{type:"textarea", path: "content.raw", label: "Content", description:"Shows on news article page only. Markdown is okay.", options:{rows:16}}
+									]
+								}
+								{
+									type:layout-vertical
+									label:"Uploads"
+									children:[
+										{type:"upload", path:"iconUrl", label:"Card Image", description:"Shows on event cards.  Square recommended.", options:{accept:"image/*", delete:"/{{.StreamID}}/delete-icon"}}
+										{type:"upload", path:"data.bannerUrl", label:"Banner Image", description:"Shows on top of event page. Optional.", options:{accept:"image/*", delete:"/{{.StreamID}}/delete-image"}}
+									]
+								}
+							]
 						}
-					]
-				}
-				{do:"upload-attachments", category:"image", fieldname:"thumbUrl", download-path:"thumbUrl", accept-type:"image/*", maximum:1, rules:{width:800, height:800, types:["webp"]}}
-				{do:"upload-attachments", action:"replace", category:"Literature", fieldname:"data.attachmentId", attachment-path:"data.attachmentId", filename-path:"data.attachmentFilename", accept-type:"text/*", maximum:1}
-				{do:"process-tags", paths:"data.tags"}
-				{do:"save-and-publish"}
-				{do:"search-index"}
-				{do:"refresh-page"}
+					}
+
+					{do:"upload-attachments", category:"icon", fieldname:"iconUrl", download-path:"iconUrl", rules:{width:800, height:800, types:["webp"]}}
+					{do:"upload-attachments", category:"image", fieldname:"data.bannerUrl", download-path:"data.bannerUrl", rules:{}}
+
+					{do:"edit-content", field:"content.raw", format:"MARKDOWN"}
+					{do:"process-tags", paths:"data.tags"}
+					{do:"if", condition: "{{.IsPublished}}",
+						then: [
+							{do:"save-and-publish", outbox:true}
+							{do:"search-index"}
+						],
+						else: [
+							{do:"save"}
+						]
+					}
+					{do:"refresh-page"}
+				]}
+			]
+		}
+
+		edit-sharing: {
+			roles: ["author"]
+			steps: [
+				{do:"as-modal", steps:[
+					{do:"set-circle-sharing", role:"viewer"}
+					{do:"save"}
+					{do:"refresh-page"}
+				]}
+			]
+		}
+
+		view: {
+			roles:["author"]
+			stateRoles: {
+				published: ["viewer"]
+			}
+			steps:[
+				{do:"view-html"}
 			]
 		}
 
 		delete: {
 			roles: ["author"]
 			steps: [
-				{do:"delete", title:"Delete this Piece?"}
+				{do:"unpublish", state:"default", outbox:"true"}
+				{do:"delete"}
+				{do:"if", condition:"{{.IsFeatured}}", then:[
+					{do:"forward-to", url:"{{.AttributedTo.ProfileURL}}"}
+				], else:[
+					{do:"forward-to", url:"{{.AttributedTo.ProfileURL}}/news"}
+				]}
+			]
+		}
+
+		publish: {
+			roles: ["author"]
+			steps: [
+				{do:"as-modal", steps:[
+					{do:"set-circle-sharing", role:"viewer", title:"Publish This News Post", message:"Who is allowed to see this post when you publish it?", button:"Publish Note"}
+					{do:"save-and-publish", state:"published", outbox:"true"}
+					{do:"search-index"}
+					{do:"refresh-page"}
+				]}
+			]
+		}
+
+		unpublish: {
+			roles: ["author"]
+			steps: [
+				{do:"as-confirmation", title:"Un-Publish this News?", message:"Un-Publishing this news will hide it everyone online.  You'll still be able to edit and make changes to it, but others will not see it.", submit:"Un-Publish from Website"}
+				{do:"unpublish", state:"default", outbox:"true"}
+				{do:"search-index"}
 				{do:"refresh-page"}
 			]
 		}
 
-		delete-icon: {
-			roles: ["author"]
-			steps: [
-				{do: "delete-attachments"}
-				{do: "set-data", values:{"thumbUrl": ""}}
-				{do: "save"}
-			]
-		}
-		prev: {
-			roles: ["anonymous"]
+		paid-content: {
+			roles:["author"]
+			stateRoles: {
+				published: ["viewer"]
+			}
 			steps:[
-				{do:"with-prev-sibling", steps:[
-					{do:"redirect-to", url:"/{{.StreamID}}"}
-				]}
+				{do:"view-html"}
 			]
 		}
 
-		next: {
-			roles: ["anonymous"]
-			steps:[
-				{do:"with-next-sibling", steps:[
-					{do:"redirect-to", url:"/{{.StreamID}}"}
-				]}
-			]
-		}
-
-		literature: {
-			steps:[
-				{do:"view-attachment", category:"literature", format:["text"], width:800, height:800}
-			]
-		}
-		editor: {
-					roles: ["author"]
-					steps: [
-						{do:"with-draft", steps: [
-							{do:"edit-content", file:"editor", format:"EDITORJS"}
-						]}
-					]
-				}
 	}
 }

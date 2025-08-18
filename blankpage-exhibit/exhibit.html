@@ -53,6 +53,7 @@
 		{{- if $canEdit -}}
 			<div class="pos-absolute-top-right text-sm">
 				<button hx-get="/{{.StreamID}}/add-creation">{{icon "plus"}}Add Creation</button>
+				<button hx-get="/{{.StreamID}}/add-writing">{{icon "plus"}}Temp add Literature Creation</button>
 				<button hx-get="/{{.StreamID}}/edit">Edit Exhibit</button>
 				<button hx-get="/{{.StreamID}}/edit-checkout">
 					{{- if .StreamHasPrivileges -}}
@@ -87,7 +88,7 @@
 				{{.Label}}
 			</h2>
 			<div class="text-sm margin-top-none">
-				<a href="/@{{.ParentID}}" hx-boost="true" hx-swap="transition:true" id="exhibit-attributedTo" aria-label="Artist: {{.AttributedTo.Name}}">
+				<a href="/@{{.ParentID}}" hx-boost="true" hx-swap="transition:true" id="exhibit-attributedTo" aria-label="Hubber: {{.AttributedTo.Name}}">
 					{{.AttributedTo.Name}}
 				</a>
 			</div>

@@ -271,6 +271,7 @@
 					location: child
 					title: + Add a Creation
 					type:blankpage-creation
+					templateId: blankpage-creation
 					with-data:{
 						"data.hubber":"{{.AttributedTo.Name}}"
 						"data.tags":"{{.Data `tags`}}"
@@ -286,31 +287,6 @@
 			]
 		}
 
-		add-song: {
-			roles: ["author"]
-			steps: [
-				{
-					do: add-stream
-					style: inline
-					location: child
-					title: + Add a Song
-					type:blankpage-sound
-					with-data:{
-						"data.hubber":"{{.AttributedTo.Name}}"
-						"data.composer":"{{.AttributedTo.Name}}"
-						"data.tags":"{{.Data `tags`}}"
-						"data.license": "{{.Data `license`}}"
-					}
-				}
-			//	{do:"set-header", name:"Hx-Retarget", value:"main"}
-			//	{do:"set-header", name:"Hx-Reswap", value:"innerHTML"}
-			//	{do:"set-header", name:"Hx-Push-Url", value:"false"}
-			//	{do:"add-event", event:"songAdded"}
-				{do:"remove-event", event:"refreshPage"}
-			//	{do:"view-html", method:"post", file:"view"}
-			]
-		}
-
 		add-writing: {
 			roles: ["author"]
 			steps: [
@@ -319,6 +295,7 @@
 					style: inline
 					location: child
 					title: + Add Literature
+					templateId: blankpage-writing
 					type:blankpage-writing
 					with-data:{
 						"data.hubber":"{{.AttributedTo.Name}}"
@@ -457,67 +434,6 @@
 			roles: ["author", "editor"]
 			steps: [
 				{do:"view-html"}
-			]
-		}
-
-		add-creation-new: {
-			roles: ["author"]
-			steps: [{
-						do:"edit",
-						form:{
-							type: layout-tabs
-							label: "+ Add a Creation"
-							children: [
-								{
-									type: layout-vertical
-									label: General
-									children: [
-										{type: "text",   path: "label", label: "Creation Title"}
-										{type: "upload", path: "data.attachmentId", label: "Artwork File", options:{filename:"data.attachmentFilename", accept:"image/*",  rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}}
-										{type: "upload", path: "iconUrl", label:"Preview Thumbnail", options:{accept:"image/*", filename:"data.imageFilename", delete:"/{{.StreamID}}/delete-icon", rules:{width:200, height:200, types:["webp", "jpg", "jpeg", "png", "gif"]}}}
-										{type: "toggle", path: "isFeatured", options:{true-text:"Featured. Highlighted on work list", false-text:"Featured?"}}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Description
-									children: [
-										{type: "textarea", path: "data.summary", description:"Enter summary or creation description.  Displays on this creation's detail page.", options:{rows: 16}}
-										{type: "toggle", path: "data.mature", options:{true-text:"Mature Content", false-text:"Mature Content"}}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Metadata
-									children: [
-										{type: "select", path: "data.license", label: "License", options:{provider:"blankpage-exhibit.licenses"}}
-										{type: "select", path: "data.category", label: "Category", options:{provider:"blankpage-exhibit.categories"}}
-										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Hashtags separated by spaces."}
-										{type: "text", path: "data.tags", label: "Tags", description:"Enter #Tags separated by spaces."}
-									]
-								}
-								{
-									type: layout-vertical
-									label: Links
-									children: [
-										{type:"text", path:"data.links.DEVIANTART", options:{placeholder:"DeviantArt"}}
-										{type:"text", path:"data.links.PIXELFED", options:{placeholder:"PixelFed"}}
-										{type:"text", path:"data.links.TUMBLR", options:{placeholder:"Tumblr"}}
-										{type:"text", path:"data.links.YOUTUBE", options:{placeholder:"YouTube"}}
-										{type:"text", path:"data.links.OTHER1", options:{placeholder:"Other"}}
-										{type:"text", path:"data.links.OTHER2", options:{placeholder:"Other"}}
-										{type:"text", path:"data.links.OTHER3", options:{placeholder:"Other"}}
-									]
-								}
-							]
-						}
-					}
-					{do:"upload-attachments", category:"Artwork", fieldname:"data.attachmentId", download-path:"data.attachmentId", accept-type:"image/*", maximum:1, rules:{types:["webp", "jpg", "jpeg", "png", "gif"]}}
-					{do:"upload-attachments", action: "replace", category:"image", fieldname:"iconUrl", download-path:"iconUrl", accept-type:"image/*", maximum:1, rules:{width:200, height:200}, rules:{types:["webp", "jpeg", "png", "jpg", "gif"]}}
-					{do:"process-tags", paths:"data.tags"}
-					{do:"save-and-publish", outbox:false}
-					{do:"search-index"}
-					{do:"refresh-page"}
 			]
 		}
 
