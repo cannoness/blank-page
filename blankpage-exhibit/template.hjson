@@ -271,7 +271,7 @@
 					location: child
 					title: + Add a Creation
 					type:blankpage-creation
-					templateId: blankpage-creation
+					template: blankpage-creation
 					with-data:{
 						"data.hubber":"{{.AttributedTo.Name}}"
 						"data.tags":"{{.Data `tags`}}"
@@ -287,7 +287,7 @@
 			]
 		}
 
-		add-writing: {
+		add-literature: {
 			roles: ["author"]
 			steps: [
 				{
@@ -295,8 +295,8 @@
 					style: inline
 					location: child
 					title: + Add Literature
-					templateId: blankpage-writing
-					type:blankpage-writing
+					template: blankpage-literature
+					type:blankpage-literature
 					with-data:{
 						"data.hubber":"{{.AttributedTo.Name}}"
 						"data.tags":"{{.Data `tags`}}"
@@ -307,7 +307,7 @@
 			//	{do:"set-header", name:"Hx-Reswap", value:"innerHTML"}
 			//	{do:"set-header", name:"Hx-Push-Url", value:"false"}
 			//	{do:"add-event", event:"writingAdded"}
-				{do:"remove-event", event:"refreshPage"}
+//				{do:"remove-event", event:"refreshPage"}
 			//	{do:"view-html", method:"post", file:"view"}
 			]
 		}

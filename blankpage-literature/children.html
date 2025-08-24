@@ -1,0 +1,41 @@
+<div class="page">
+
+	<div id="menu-bar">
+		<div class="left">
+			<a href="/{{.StreamID}}">&larr; View</a>
+
+			{{- if .UserCan "edit" -}}
+				<a href="/{{.StreamID}}/edit">Edit</a>
+			{{- end -}}
+
+			{{- if .UserCan "widgets" -}}
+				<a href="/{{.StreamID}}/widgets">Widgets</a>
+			{{- end -}}
+
+			{{- if .UserCan "children" -}}
+				<a href="/{{.StreamID}}/children" class="bold">Children</a>
+			{{- end -}}
+
+			{{- if .UserCan "properties" -}}
+				<a hx-get="/{{.StreamID}}/properties">Info</a>
+			{{- end -}}
+
+			{{- if .UserCan "sharing" -}}
+				<a hx-get="/{{.StreamID}}/sharing">Sharing</a>
+			{{- end -}}
+		</div>
+
+		<div class="right">
+			<button script="on click saveDraft(true)" class="button primary">Promote</button>
+			<button hx-get="/{{.StreamID}}/discard-draft">Discard Draft</button>
+
+			{{- if .UserCan "delete" -}}
+				<a hx-get="/{{.StreamID}}/delete" class="text-red">Delete</a>
+			{{- end -}}
+		</div>
+
+	</div>
+
+	{{- template "children-sort" . -}}
+	
+</div>

@@ -53,7 +53,7 @@
 		{{- if $canEdit -}}
 			<div class="pos-absolute-top-right text-sm">
 				<button hx-get="/{{.StreamID}}/add-creation">{{icon "plus"}}Add Creation</button>
-				<button hx-get="/{{.StreamID}}/add-writing">{{icon "plus"}}Temp add Literature Creation</button>
+				<button hx-get="/{{.StreamID}}/add-literature">{{icon "plus"}}Temp add Literature Creation</button>
 				<button hx-get="/{{.StreamID}}/edit">Edit Exhibit</button>
 				<button hx-get="/{{.StreamID}}/edit-checkout">
 					{{- if .StreamHasPrivileges -}}

@@ -1,252 +1,271 @@
 {
-	templateId: blankpage-writing
-	templateRole: Note
+	templateId: blankpage-literature
+	templateRole: writing
 	model: Stream
 	label: Writing
-	extends: ["base-intent"]
+	extends: ["base-widget-editor", "base-intent", "blankpage-common"]
 	containedBy: ["exhibit"]
-
-	schema: {
-		type:object
-        properties: {
-			title: {type:"string"}
-			summary: {type:"string"}
-			content: {type:"object", properties:{
-				"type": {type:"string"}
-				"raw": {type:"string"}
-				"html": {type:"string"}
-			}}
-			data: {type:"object", properties:{
-				linkText: {type:"string"}
-				bannerUrl: {type:"string", format:"url"}
-			}}
+	bundles: {
+		stylesheet: {
+			content-type:"text/css"
 		}
+		javascript: {contentType: "text/javascript"}
+		hyperscript: {contentType: "text/hyperscript"}
 	}
-
-	roles: {
-		viewer: {
-			label: Viewer
-			description: Can view this news item when it is published.
-			privileged: true
-		}
-	}
-
 	states: {
 		default: {
-			label: Unpublished,
-			description: This item can only be seen by hubbers
+			label:"Default State"
+			description:"Visible only to Authors and Owners"
 		}
 		published: {
-			label: Published,
-			description: This item is visible to everyone
+			label:"Published"
+			description:"Visible to all people with permissions"
+		}
+	}
+	roles: {
+		viewer: {
+			label:"Viewer"
+			description:"Can read and comment on this article."
 		}
 	}
 
-	socialRole: Article
+	schema: {
+		type: object
+		properties: {
+			iconUrl:{type:"string"}
+			label: {type:"string"}
+			summary: {type:"string"}
+			content:{type:"object", properties: {
+					format: {type:"string", default: "MARKDOWN"}
+					raw: {type:"string", default: ""}
+					html: {type:"string", format:"html"}
+				}
+			}
+			data: {
+				type: object
+				properties: {
+					tags: {type:"string"}
+					length: {type: "string"}
+					title: {type: "string"}
+					genre: {type: "string"}
+					hubber: {type: "string"}
+					publisher: {type: "string"}
+					license: {type: "string"}
+					category: {type: "string"}
+					featured: {type: "boolean"}
+					mature: {type: "boolean"}
+					favorites: {type: "string"},
+					attachmentId: {type: "string"}
+					attachmentFilename: {type: "string"}
+					links: {
+						type: object
+						wildcard:{type: "string", format:"url"}
+					}
+				}
+			}
+		}
+	}
+
+	socialRole: Literature
 	socialRules: [
-		{target:"content", expression:"{{.SummaryOrContent}}"}
+		{target:"type", value:"Literature"}
+		{target:"attributedTo.id", path:"attributedTo.profileUrl"}
+		{target:"attributedTo.name", path:"attributedTo.name"}
+		{target:"links", forEach:"data.links", rules:[
+			{target:"label", path:"key"}
+			{target:"rel", value:"alternate"}
+			{target:"href", path:"value"}
+		]}
+		{target:"work.type", value:"work"}
+		{target:"work.id", path:"url"}
+		{target:"work.name", path:"label"}
+		{target:"work.exhibit", expression:"{{.ParentURL}}"}
+		{target:"work.position", path:"rank"}
+		{target:"content", path:"data.summary"}
+		{target:"exhibit", expression:"{{.ParentURL}}"}
+		{target:"library", expression:"{{.ParentURL}}/pub/children"}
 	]
 
-	search: {
-		type:Article
-		iconUrl:""
-		summary:""
-		text: "{{.Label}} {{.AttributedTo.Name}} {{.Summary}} {{.Content.HTML}}"
-	}
-
-	tagPaths: ["summary", "content.html"]
-
 	actions: {
-
-		togglebutton: {
+		create: {
 			roles:["author"]
 			steps: [
-				{do:"edit", form:{
-					type:layout-vertical
-					label:"Test Form"
-					children:[
-						{type:"check-button", label:"Share with Everyone", description:"This is a cool test description", path:"test", options:{icon:"globe", value:"PUBLIC", script:"on change if my.checked tell .circles set your.checked to false"}}
-						{type:"check-button-group", label:"Circles", path:"test", options:{provider:"circles", script:"on change if my.checked then set #checkbutton-test-PUBLIC.checked to false", class:"circles"}}
-					]
-				}}
+				{do: "view-html", file: "edit"}
+				{do: "set-data", from-form: [
+					"label",
+					"data.tags",
+					"data.category",
+					"data.genre",
+					"data.license",
+					"data.title",
+					"data.featured",
+					"data.mature",
+					"data.links"
+				]}
+				{do:"edit-content", field:"content.raw", format:"MARKDOWN"}
+				{do:"upload-attachments", category:"icon", fieldname:"iconUrl", download-path:"iconUrl", rules:{width:800, height:800, types:["webp", "gif", "jpg", "jpeg", "png"]}}
+				{do:"process-tags", paths:"data.tags"}
+				{do:"set-state", state:"default"}
+				{do:"save-and-publish", outbox:false}
+				{do:"search-index"}
+				{do:"refresh-page"}
 			]
 		}
-
-		create: {
+		view: {
 			roles: ["author"]
-			steps: [
-				{do:"as-modal", options:["class:large"], steps:[
-					{do:"set-data", from-url:["isFeatured"]}
-					{
-						do:edit
-						form: {
-							type:layout-tabs
-							label:"+ Add News"
-							children: [
-								{
-									type:layout-vertical
-									label: News
-									children: [
-										{type:"text", path: "label", label: "Title"}
-										{type:"textarea", path: "summary", label: "Summary", description:"Shows on list pages.", options:{rows:5}}
-										{type:"text", path:"data.linkText", label:"Link Text", description:"Text for the link to the full article.", options:{placeholder:"Read More"}}
-										{type:"toggle", path: "isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured"}}
-									]
-								}
-								{
-									type:layout-vertical
-									label:"Content"
-									children:[
-										{type:"textarea", path: "content.raw", label: "Content", description:"Shows on news article page only. Markdown is okay.", options:{rows:16}}
-									]
-								}
-								{
-									type:layout-vertical
-									label:"Uploads"
-									children:[
-										{type:"upload", path:"iconUrl", label:"Card Image", description:"Shows on event cards.  Square recommended.", options:{accept:"image/*", delete:"/{{.StreamID}}/delete-icon"}}
-										{type:"upload", path:"data.bannerUrl", label:"Banner Image", description:"Shows on top of event page. Optional.", options:{accept:"image/*", delete:"/{{.StreamID}}/delete-image"}}
-									]
-								}
-							]
-						}
-					}
-
-					{do:"upload-attachments", category:"icon", fieldname:"iconUrl", download-path:"iconUrl", rules:{width:800, height:800, types:["webp"]}}
-					{do:"upload-attachments", category:"image", fieldname:"data.bannerUrl", download-path:"data.bannerUrl", rules:{}}
-
-					{do:"edit-content", field:"content.raw", format:"MARKDOWN"}
-					{do:"process-tags", paths:"data.tags"}
-					{do:"save"}
-					{do:"search-index"}
-					{do:"forward-to", url:"/{{.StreamID}}"}
-				]}
+			stateRoles: {
+				published: ["viewer"]
+			}
+			steps:[
+				{do:"view-html"}
 			]
 		}
 
 		edit: {
 			roles: ["author"]
 			steps: [
-				{do:"as-modal", options:["class:large"], steps:[
-					{do:"view-html"}
-					{
-						do:"edit"
-						options: ["delete:/{{.StreamID}}/delete"]
-						form: {
-							type:layout-tabs
-							children: [
-								{
-									type:layout-vertical
-									label: News
-									children: [
-										{type:"text", path: "label", label: "Title"}
-										{type:"textarea", path: "summary", label: "Summary", description:"Shows on list pages.", options:{rows:5}}
-										{type:"text", path:"data.linkText", label:"Link Text", description:"Text for the link to the full article.", options:{placeholder:"Read More"}}
-										{type:"toggle", path: "isFeatured", options:{true-text:"Featured (shows on home page)", false-text:"Featured"}}
-									]
-								}
-								{
-									type:layout-vertical
-									label:"Content"
-									children:[
-										{type:"textarea", path: "content.raw", label: "Content", description:"Shows on news article page only. Markdown is okay.", options:{rows:16}}
-									]
-								}
-								{
-									type:layout-vertical
-									label:"Uploads"
-									children:[
-										{type:"upload", path:"iconUrl", label:"Card Image", description:"Shows on event cards.  Square recommended.", options:{accept:"image/*", delete:"/{{.StreamID}}/delete-icon"}}
-										{type:"upload", path:"data.bannerUrl", label:"Banner Image", description:"Shows on top of event page. Optional.", options:{accept:"image/*", delete:"/{{.StreamID}}/delete-image"}}
-									]
-								}
-							]
-						}
-					}
-
-					{do:"upload-attachments", category:"icon", fieldname:"iconUrl", download-path:"iconUrl", rules:{width:800, height:800, types:["webp"]}}
-					{do:"upload-attachments", category:"image", fieldname:"data.bannerUrl", download-path:"data.bannerUrl", rules:{}}
-
-					{do:"edit-content", field:"content.raw", format:"MARKDOWN"}
-					{do:"process-tags", paths:"data.tags"}
-					{do:"if", condition: "{{.IsPublished}}",
-						then: [
-							{do:"save-and-publish", outbox:true}
-							{do:"search-index"}
-						],
-						else: [
-							{do:"save"}
-						]
-					}
-					{do:"refresh-page"}
+				{do:"with-draft", steps: [
+					{do:"edit-content", file:"edit", format:"MARKDOWN"}
+				]}
+				{do: "set-data", from-form: [
+					"label",
+					"data.tags",
+					"data.category",
+					"data.genre",
+					"content",
+					"data.license",
+					"data.title",
+					"data.featured",
+					"data.mature",
+					"data.links",
+					"iconUrl"
 				]}
 			]
 		}
-
-		edit-sharing: {
+		editor: {
 			roles: ["author"]
 			steps: [
-				{do:"as-modal", steps:[
-					{do:"set-circle-sharing", role:"viewer"}
-					{do:"save"}
-					{do:"refresh-page"}
+				{do:"with-draft", steps: [
+					{do:"edit-content", file:"editor", format:"MARKDOWN"}
 				]}
 			]
 		}
-
-		view: {
-			roles:["author"]
-			stateRoles: {
-				published: ["viewer"]
-			}
-			steps:[
-				{do:"view-html"}
-			]
-		}
-
 		delete: {
 			roles: ["author"]
 			steps: [
 				{do:"unpublish", state:"default", outbox:"true"}
-				{do:"delete"}
-				{do:"if", condition:"{{.IsFeatured}}", then:[
-					{do:"forward-to", url:"{{.AttributedTo.ProfileURL}}"}
-				], else:[
-					{do:"forward-to", url:"{{.AttributedTo.ProfileURL}}/news"}
+				{do:"delete", title:"Delete '{{.Label}}'?", message:"All content and comments will be lost.  There is NO UNDO."}
+				{do:"forward-to", url:"/{{.ParentID}}"}
+			]
+		}
+
+		heading: {
+			roles: ["viewer", "author"]
+			steps: [
+				{do: "view-html"}
+			]
+		}
+
+		children: {
+			roles: ["author"]
+			steps: [
+				{do:"view-html"}
+				{do:"sort", keys:"_id", values:"rank"}
+			]
+		}
+
+		upload-image: {
+			roles: ["author"]
+			steps: [
+				{do:"with-draft", steps: [
+					{do:"upload-attachments", fieldname:"image", json-result:true, category:"image", accept-type:"image/*"}
+				]}
+			]
+		}
+
+		sharing: {
+			roles: ["owner"]
+			steps: [
+				{do:"as-modal", steps: [
+					{do:"set-simple-sharing", role: "viewer", title:"Who Can See This Article?", message:"Select who can view and comment on this article."}
+					{do:"save", message:"Sharing updated by {{.Author}}"}
 				]}
 			]
 		}
 
 		publish: {
+			states: ["default"]
 			roles: ["author"]
 			steps: [
-				{do:"as-modal", steps:[
-					{do:"set-circle-sharing", role:"viewer", title:"Publish This News Post", message:"Who is allowed to see this post when you publish it?", button:"Publish Note"}
-					{do:"save-and-publish", state:"published", outbox:"true"}
-					{do:"search-index"}
-					{do:"refresh-page"}
-				]}
-			]
-		}
-
-		unpublish: {
-			roles: ["author"]
-			steps: [
-				{do:"as-confirmation", title:"Un-Publish this News?", message:"Un-Publishing this news will hide it everyone online.  You'll still be able to edit and make changes to it, but others will not see it.", submit:"Un-Publish from Website"}
-				{do:"unpublish", state:"default", outbox:"true"}
+				{do:"as-confirmation", title:"Publish this Stream?", message:"Viewers will be able to see this stream on your website immediately.", submit:"Publish"}
+				{do:"save-and-publish", state:"published", outbox:"false"}
 				{do:"search-index"}
 				{do:"refresh-page"}
 			]
 		}
 
-		paid-content: {
-			roles:["author"]
-			stateRoles: {
-				published: ["viewer"]
-			}
-			steps:[
-				{do:"view-html"}
+		unpublish: {
+			states: ["published"]
+			roles: ["author"]
+			steps: [
+				{do:"as-confirmation", title:"Un-Publish this Stream?", message:"Viewers will no longer be able to see this stream on your website.", submit:"Un-Publish"}
+				{do:"unpublish", state:"default", outbox:"false"}
+				{do:"refresh-page"}
 			]
+		}
+
+		promote-draft: {
+			roles: ["author"]
+			steps: [
+				{do:"as-confirmation", title:"Promote this Draft?", message:"The live page will be replaced with this content.", submit:"Promote"}
+				{do:"promote-draft"}
+				{do:"process-tags", paths:"data.tags"}
+				{do:"save-and-publish", state:"published", outbox:"false"}
+				{do:"search-index"}
+				{do:"refresh-page"}
+				{do:"forward-to", url:"/{{.Token}}"}
+			]
+		}
+
+		discard-draft: {
+			roles: ["author"]
+			steps: [
+				{do:"with-draft", steps:[
+					{do:"delete", title:"Discard This Draft?", message:"The original article will remain unchanged.", submit:"Discard Draft"}
+				]}
+				{do:"forward-to", url:"/{{.Token}}"}
+			]
+		}
+
+
+		icon: {
+			roles:["anonymous"]
+			steps: [
+				{do:"redirect-to", url:"{{.IconURL}}"}
+			]
+		}
+		properties: {
+			roles: ["author"]
+			steps: [
+				{do:"with-draft", steps:[
+					{do:"as-modal", steps: [
+						{do:"edit"
+							form: {
+								type:"layout-vertical"
+								label:"Article Properties"
+								children: [
+									{type:"text", path:"token", label:"Token/Slug"}
+									{type:"select", path:"icon", label:"Icon", options:{provider:"folder-icons"}}
+									{type:"text", path:"label", label:"Label"}
+									{type:"textarea", path:"summary", label:"Summary"}
+									{type:"textarea", path:"data.tags", label:"Hashtags", description:"List hashtags here to categorize this article."}
+								]
+							}
+						}]
+					}
+					{do:"save", comment:"Properties updated by {{.Author}}"}
+				]
+			}]
 		}
 
 	}

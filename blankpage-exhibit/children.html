@@ -12,9 +12,9 @@
 	{{- range $index, $result := $results -}}
 		{{- $icon := .IconURL -}}
 		{{- if not .IconURL -}}
-			{{- $icon = $result.Data.attachmentId -}}
+			{{- with $result.Data.attachmentId -}}{{- $icon = $result.Data.attachmentId -}}{{- end -}}
 		{{- else if not $result.Data.attachmentId -}}
-			{{- $icon = $results.Data.imageUrl -}}
+			{{- with $result.Data.attachmentId -}}{{- $icon = $results.Data.imageUrl -}}{{- end -}}
 		{{- end -}}
 		<div streamId="{{.StreamID}}" class="container item">
 			<div
@@ -25,10 +25,11 @@
 					<img src="{{$icon}}">
 					<span class="title"> {{.Label}} </span>
 					<span class="text">
-						Favorites: {{ $result.Data.favorites }}<br/>
+					{{- with $result.Data.sumary -}}Summary:{{ $result.Data.summary }}<br/>{{- end -}}
 						Date Created: {{ $result.Data.dateCreated }}<br/>
-{{- with $result.Data.category -}}Tags:{{ $result.Data.tags }}<br/>{{- end -}}
-{{- with $result.Data.category -}}Category: {{ $result.Data.category }}<br/>{{- end -}}
+					{{- with $result.Data.tags -}}Tags:{{ $result.Data.tags }}<br/>{{- end -}}
+					{{- with $result.Data.category -}}Category: {{ $result.Data.category }}<br/>{{- end -}}
+						Favorites: {{ $result.Data.favorites }}<br/>
 					</span>
 			</div>
 		</div>

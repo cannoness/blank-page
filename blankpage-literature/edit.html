@@ -1,13 +1,17 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+
 <div data-hx-target="this" data-hx-swap="outerHTML" data-hx-push-url="false">
 <form method="post" hx-post="{{.URL}}" hx-swap="none" hx-push-url="false" hx-encoding="multipart/form-data" hx-trigger="submit" data-script="init send checkFormRules(changed:me as Values)">
-    <div class="layout-title"> + Add a Creation</div>
+ 	<div class="layout-title"> + Add new Literature</div>
     <div class="tabs" data-script="install TabContainer">
         <div role="tablist">
             <button type="button" role="tab" id="tab-tabcontainer-0" class="tab-label" aria-controls="panel-tabcontainer-0" tabIndex="0" aria-selected="true">General</button>
-            <button type="button" role="tab" id="tab-tabcontainer-1" class="tab-label" aria-controls="panel-tabcontainer-1" tabIndex="0">Description</button>
+            <button type="button" role="tab" id="tab-tabcontainer-1" class="tab-label" aria-controls="panel-tabcontainer-1" tabIndex="0">Content</button>
             <button type="button" role="tab" id="tab-tabcontainer-2" class="tab-label" aria-controls="panel-tabcontainer-2" tabIndex="0">Metadata</button>
             <button type="button" role="tab" id="tab-tabcontainer-3" class="tab-label" aria-controls="panel-tabcontainer-3" tabIndex="0">Links</button>
-        </div>
+		</div>
         <div role="tabpanel" id="panel-tabcontainer-0" aria-labelledby="tab-tabcontainer-0">
             <div class="layout layout-vertical">
                 <div class="layout-elements">
@@ -16,16 +20,22 @@
                         <input name="label" id="label.text" aria-label="Creation Title" tabIndex="0" type="text">
                     </div>
                     <div class="layout-element layout-vertical-element">
-                        <label for="data.attachmentId.upload" aria-hidden="true">Artwork File</label>
-                        <input type="file" name="data.attachmentId" id="data.attachmentId.upload" accept="image/*" aria-label="Artwork File" tabIndex="0">
+                        <label for="featured.toggle" aria-hidden="true"></label>
+                        <span id="toggle-featured-false" data-script="install toggle " name="featured" true-text="Featured. Highlighted on work list" false-text="Featured?"></span>
+                    </div>
+                     <div class="layout-element layout-vertical-element">
+                        <label for="summary.textarea" aria-hidden="true">Summary</label>
+                        <textarea name="summary" id="summary.textarea" hint="Shows on list pages." rows="5" aria-labelledby="summary.textarea.label" aria-describedby="summary.textarea.description" tabIndex="0"></textarea>
+                        <div aria-hidden="true" class="text-sm gray40">Shows on list pages.</div>
                     </div>
                     <div class="layout-element layout-vertical-element">
                         <label for="iconUrl.upload" aria-hidden="true">Preview Thumbnail</label>
-                        <input type="file" name="iconUrl" id="iconUrl.upload" accept="image/*" aria-label="Preview Thumbnail" tabIndex="0">
+                        <input type="file" name="iconUrl" id="iconUrl.upload" accept="image/*" aria-label="Preview Thumbnail" aria-description="The thumbnail image for your creation.  Square recommended." tabIndex="0">
+                        <div aria-hidden="true" class="text-sm gray40">The thumbnail image for your creation.  Square recommended.</div>
                     </div>
                     <div class="layout-element layout-vertical-element">
-                        <label for="featured.toggle" aria-hidden="true"></label>
-                        <span id="toggle-featured-false" data-script="install toggle " name="featured" true-text="Featured. Highlighted on work list" false-text="Featured?"></span>
+                        <label for="data.mature.toggle" aria-hidden="true"></label>
+                        <span id="toggle-data-mature" data-script="install toggle " name="data.mature" true-text="Mature Content" false-text="Mature Content"></span>
                     </div>
                 </div>
             </div>
@@ -33,15 +43,11 @@
         <div role="tabpanel" id="panel-tabcontainer-1" aria-labelledby="tab-tabcontainer-1" hidden="true">
             <div class="layout layout-vertical">
                 <div class="layout-elements">
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.summary.textarea" aria-hidden="true"></label>
-                        <textarea name="data.summary" id="data.summary.textarea" hint="Enter summary or creation description.  Displays on this creation&#39;s detail page." rows="16" aria-labelledby="data.summary.textarea.label" aria-describedby="data.summary.textarea.description" tabIndex="0"></textarea>
-                        <div aria-hidden="true" class="text-sm gray40">Enter summary or creation description.  Displays on this creation's detail page.</div>
-                    </div>
-                    <div class="layout-element layout-vertical-element">
-                        <label for="data.mature.toggle" aria-hidden="true"></label>
-                        <span id="toggle-data-mature" data-script="install toggle " name="data.mature" true-text="Mature Content" false-text="Mature Content"></span>
-                    </div>
+					<div class="layout-element layout-vertical-element">
+						<label for="contentMarkdown" aria-hidden="true">Content</label>
+						<textarea name="content.raw" id="contentMarkdown" hint="Markdown is okay." rows="16" aria-labelledby="content.raw.textarea.label" aria-describedby="content.raw.textarea.description" tabIndex="0"></textarea>
+						<div aria-hidden="true" class="text-sm gray40"> Markdown is okay.</div>
+					 </div>
                 </div>
             </div>
         </div>
@@ -51,7 +57,6 @@
                     <div class="layout-element layout-vertical-element">
                         <label for="data.license.select" aria-hidden="true">License</label>
                         <select id="data.license.select" name="data.license" aria-labelledby="data.license.select.label" aria-describedby="data.license.select.description" tabIndex="0">
-                            <option></option>
                             <option value="COPYRIGHT">All Rights Reserved</option>
                             <option value="CC-BY">Creative Commons - Attribution</option>
                             <option value="CC-BY-NC">Creative Commons - Attribution - Non Commercial</option>
@@ -66,29 +71,15 @@
                     <div class="layout-element layout-vertical-element">
                         <label for="data.category.select" aria-hidden="true">Category</label>
                         <select id="data.category.select" name="data.category" aria-labelledby="data.category.select.label" aria-describedby="data.category.select.description" tabIndex="0">
-                            <option></option>
-                            <option value="DIGITAL">Digital Art</option>
-                            <option value="TRADITIONAL">Traditional Media</option>
-                            <option value="ANIMATED">Animated</option>
-                            <option value="FANART">Fan Art</option>
-                            <option value="FRACTAL">Fractals</option>
-                            <option value="ARTISAN">Artisan Crafts</option>
-                            <option value="STOCK-IMAGE">Stock Art</option>
-                            <option value="PHOTOGRAPHY">Photography</option>
-                            <option value="MIXED-MEDIA">Mixed Media</option>
-                            <option value="COMIC">Comics and Graphic Novels</option>
-                            <option value="COSPLAY">Cosplay</option>
-                            <option value="AUDIO">Audio</option>
                             <option value="FICTION">Fiction</option>
                             <option value="FANFIC">Fan Fiction</option>
                             <option value="NON-FICTION">Non-Fiction</option>
                             <option value="POETRY-LYRICS">Poetry and Lyrics</option>
-                            <option value="PROGRAM">Programs and Applications</option>
-                        </select>
+						</select>
                     </div>
                     <div class="layout-element layout-vertical-element">
                         <label for="data.tags.text" aria-hidden="true">Tags</label>
-                        <input name="data.tags" id="data.tags.text" aria-label="Tags" aria-description="Enter #Tags separated by spaces." tabIndex="0" type="text" value="#test #anexhibit #stuffyouhaveuploaded">
+                        <input name="data.tags" id="data.tags.text" aria-label="Tags" aria-description="Enter #Tags separated by spaces." tabIndex="0" type="text" value="#test">
                         <div aria-hidden="true" class="text-sm gray40">Enter #Tags separated by spaces.</div>
                     </div>
                 </div>
@@ -137,11 +128,22 @@
         </div>
     </div>
 </form>
-</div>
 <div
-    hx-get="/{{.StreamID}}/add-creation"
+    hx-get="/{{.StreamID}}/add-literature"
     hx-trigger="refreshPage from:window"
     hx-target="#main"
     hx-swap="innerHTML"
     hx-push-url="false">
+</div>
+	<script type="text/hyperscript" src="/.templates/blankpage-literature/hyperscript">
+		def saveDraft(promote)
+			set #contentMarkdown.value to easyMDE.value()
+			if promote then
+				send save to #markdownDiv
+				wait for htmx:afterOnLoad from #markdownDiv
+				fetch /{{.StreamID}}/promote-draft with method:"POST"
+			end
+		end
+	</script>
+	<script type="text/javascript" src="/.templates/blankpage-literature/javascript"></script>
 </div>

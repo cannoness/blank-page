@@ -64,7 +64,7 @@
 		{target:"content", path:"data.summary"}
 		{target:"exhibit", expression:"{{.ParentURL}}"}
 		{target:"library", expression:"{{.ParentURL}}/pub/children"}
-	],
+	]
 
 	search: {
 		type: Artwork
@@ -94,7 +94,6 @@
 						"data.featured",
 						"data.mature",
 						"data.attachmentId",
-						"data.thumbFilename",
 						"data.attachmentFilename",
 						"data.links",
 						"iconUrl"
