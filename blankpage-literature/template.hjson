@@ -85,7 +85,12 @@
 		{target:"exhibit", expression:"{{.ParentURL}}"}
 		{target:"library", expression:"{{.ParentURL}}/pub/children"}
 	]
-
+	search: {
+		type: Literature
+		thumbUrl:"{{first .IconURL (join `/` .ParentID.Hex `/icon`)}}"
+		summary:"{{.Label}} {{.AttributedTo.Name}} {{index .Data `summary`}}"
+		tags: "LIC:{{index .Data `license`}}"
+	}
 	actions: {
 		create: {
 			roles:["author"]
@@ -124,22 +129,32 @@
 		edit: {
 			roles: ["author"]
 			steps: [
-				{do:"with-draft", steps: [
-					{do:"edit-content", file:"edit", format:"MARKDOWN"}
-				]}
+				{do: "view-html"}
 				{do: "set-data", from-form: [
 					"label",
+					"summary",
 					"data.tags",
 					"data.category",
 					"data.genre",
-					"content",
 					"data.license",
 					"data.title",
 					"data.featured",
 					"data.mature",
-					"data.links",
-					"iconUrl"
+					"data.links"
 				]}
+				{do:"edit-content", field:"content.raw", format:"MARKDOWN"}
+				{do:"upload-attachments", category:"icon", fieldname:"iconUrl", download-path:"iconUrl", rules:{width:800, height:800, types:["webp", "gif", "jpg", "jpeg", "png"]}}
+				{do:"process-tags", paths:"data.tags"}
+				{do:"if", condition: "{{.IsPublished}}",
+					then: [
+						{do:"save-and-publish", outbox:true}
+						{do:"search-index"}
+					],
+					else: [
+						{do:"save"}
+					]
+				}
+				{do:"refresh-page"}
 			]
 		}
 		editor: {

@@ -109,8 +109,7 @@
 		exhibits: {
 			roles: ["anonymous"]
 			steps:[
-				{do:"view-html", "file": "exhibits"
-				}
+				{do:"view-html"}
 			]
 		}
 		

@@ -25,7 +25,8 @@
 					<img src="{{$icon}}">
 					<span class="title"> {{.Label}} </span>
 					<span class="text">
-					{{- with $result.Data.sumary -}}Summary:{{ $result.Data.summary }}<br/>{{- end -}}
+					{{- with $result.Data.summary -}}Summary: {{ $result.Data.summary }}<br/>{{- end -}}
+					{{- with $result.Summary -}}Summary: {{ $result.Summary }}<br/>{{- end -}}
 						Date Created: {{ $result.Data.dateCreated }}<br/>
 					{{- with $result.Data.tags -}}Tags:{{ $result.Data.tags }}<br/>{{- end -}}
 					{{- with $result.Data.category -}}Category: {{ $result.Data.category }}<br/>{{- end -}}

@@ -17,7 +17,7 @@
                 <div class="layout-elements">
                     <div class="layout-element layout-vertical-element">
                         <label for="label.text" aria-hidden="true">Creation Title</label>
-                        <input name="label" id="label.text" aria-label="Creation Title" tabIndex="0" type="text">
+                        <input name="label" id="label.text" aria-label="Creation Title" tabIndex="0" type="text" value="{{.Label}}">
                     </div>
                     <div class="layout-element layout-vertical-element">
                         <label for="featured.toggle" aria-hidden="true"></label>
@@ -25,7 +25,7 @@
                     </div>
                      <div class="layout-element layout-vertical-element">
                         <label for="summary.textarea" aria-hidden="true">Summary</label>
-                        <textarea name="summary" id="summary.textarea" hint="Shows on list pages." rows="5" aria-labelledby="summary.textarea.label" aria-describedby="summary.textarea.description" tabIndex="0"></textarea>
+                        <textarea name="summary" id="summary.textarea" hint="Shows on list pages." rows="5" aria-labelledby="summary.textarea.label" aria-describedby="summary.textarea.description" tabIndex="0" placeholder="{{.Summary}}">{{.Summary}}</textarea>
                         <div aria-hidden="true" class="text-sm gray40">Shows on list pages.</div>
                     </div>
                     <div class="layout-element layout-vertical-element">
@@ -45,7 +45,7 @@
                 <div class="layout-elements">
 					<div class="layout-element layout-vertical-element">
 						<label for="contentMarkdown" aria-hidden="true">Content</label>
-						<textarea name="content.raw" id="contentMarkdown" hint="Markdown is okay." rows="16" aria-labelledby="content.raw.textarea.label" aria-describedby="content.raw.textarea.description" tabIndex="0"></textarea>
+						<textarea name="content.raw" id="contentMarkdown" hint="Markdown is okay." rows="16" aria-labelledby="content.raw.textarea.label" aria-describedby="content.raw.textarea.description" tabIndex="0" placeholder="{{.ContentRaw}}">{{.ContentRaw}}</textarea>
 						<div aria-hidden="true" class="text-sm gray40"> Markdown is okay.</div>
 					 </div>
                 </div>
@@ -135,7 +135,7 @@
     hx-swap="innerHTML"
     hx-push-url="false">
 </div>
-	<script type="text/hyperscript" src="/.templates/blankpage-literature/hyperscript">
+	<script type="text/hyperscript" >
 		def saveDraft(promote)
 			set #contentMarkdown.value to easyMDE.value()
 			if promote then
